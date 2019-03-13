@@ -304,3 +304,104 @@ mvn [plugin-name]:[goal-name]
 | javadoc  | 为工程生成 Javadoc。                                |
 | antrun   | 从构建过程的任意一个阶段中运行一个 ant 任务的集合。 |
 
+## 6.创建工程
+
+maven使用**原型**(archetype)来创建工程。
+
+> 以下使用插件在命令行创建工程：
+>
+> ```shell
+> C:\MVN>mvn archetype:generate
+> -DgroupId=com.companyname.bank 
+> -DartifactId=consumerBanking 
+> -DarchetypeArtifactId=maven-archetype-quickstart 
+> -DinteractiveMode=false
+> ```
+
+> 运行输出：
+
+```shell
+INFO] Scanning for projects...
+[INFO] Searching repository for plugin with prefix: 'archetype'.
+[INFO] -------------------------------------------------------------------
+[INFO] Building Maven Default Project
+[INFO]    task-segment: [archetype:generate] (aggregator-style)
+[INFO] -------------------------------------------------------------------
+[INFO] Preparing archetype:generate
+[INFO] No goals needed for project - skipping
+[INFO] [archetype:generate {execution: default-cli}]
+[INFO] Generating project in Batch mode
+[INFO] -------------------------------------------------------------------
+[INFO] Using following parameters for creating project 
+ from Old (1.x) Archetype: maven-archetype-quickstart:1.0
+[INFO] -------------------------------------------------------------------
+[INFO] Parameter: groupId, Value: com.companyname.bank
+[INFO] Parameter: packageName, Value: com.companyname.bank
+[INFO] Parameter: package, Value: com.companyname.bank
+[INFO] Parameter: artifactId, Value: consumerBanking
+[INFO] Parameter: basedir, Value: C:\MVN
+[INFO] Parameter: version, Value: 1.0-SNAPSHOT
+[INFO] project created from Old (1.x) Archetype in dir: C:\MVN\consumerBanking
+[INFO] ------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------
+[INFO] Total time: 14 seconds
+[INFO] Finished at: Tue Jul 10 15:38:58 IST 2012
+[INFO] Final Memory: 21M/124M
+[INFO] ------------------------------------------------------------------
+```
+
+## 外部依赖
+
+外部依赖是对仓库的补充
+
+如果在中央仓库，远程仓库没有需要的依赖，可以通过添加外部依赖的方式解决
+
+```xml
+<dependency>
+    <groupId>ldapjdk</groupId>
+    <artifactId>ldapjdk</artifactId>
+    <scope>system</scope>
+    <version>1.0</version>
+    <systemPath>${basedir}/src/lib/ldapjdk.jar</systemPath>
+</dependency>
+```
+
+关键概念：
+
+* 外部依赖(library jar location)能够像其他依赖一样在pom中配置
+* 指定groupId为library的名称
+* 指定artifactId为library的名称
+* 指定作用域(scope)为系统
+* 指定相对于工程位置的系统路径，或者是绝对路径
+
+## 工程文档
+
+
+
+## 工程模板
+
+maven使用原型(archetype)概念为用户提供了大量不同类型的工程模板(614)
+
+### 什么是原型
+
+原型是一个插件，它的任务是根据模板创建一个项目结构
+
+## 快照
+
+概念：快照是一个特殊版本，他表示当前开发的一个副本。与常规版本不同，maven每一次构建从仓库中检出一份新的快照版本
+
+> 为什么有快照的概念？
+>
+> 开发中，代码每天的迭代较快，不同的模块由不同的团队完成，每天有不同的版本，那么会带来一下的问题：
+>
+> - 每次版本更新了，都要告诉消费工程
+> - 消费工程要更新pom文件来得到最新的版本
+
+### 快照VS版本
+
+* 对于版本，maven一旦下载了指定的版本(例如data-service:1.0)，它将不会尝试从仓库里再次下载一个新的1.0版本
+* 对于快照，每次构建项目时，maven都会自动获取最新的快照(data-service:1.0-SNAPSHOT)
+
+==主要就是通过SNAPSHOT来标识的，有这个标识，maven就会去远程查询是否有新的==
+
