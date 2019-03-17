@@ -140,6 +140,20 @@ configure arguments: --prefix=/usr/local/nginx --sbin-path=/usr/local/nginx/sbin
 
 ### 配置
 
+![`nginx配置文件结构图](assets/20180205152104446.png)
+
+启动过程中遇到不少因为文件没有创建而无法启动的问题：
+
+根据配置提前创建好文件夹或者相关文件
+
+```bash
+
+```
+
+
+
+
+
 ### 命令
 
 ## 应用场景
