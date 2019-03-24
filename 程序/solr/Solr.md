@@ -175,3 +175,42 @@ tomcat部署solr注意事项
 ## solr7配置ik分词器
 
 主要配置`manage-schema`文件，添加jar包，重启solr即可完成
+
+* 拷贝ikanalyzerxxx.jar到WEB-INF/lib目录下
+
+* 拷贝资源文件到WEB-INF/classes文件夹下
+
+  > 这些文件是指定词库的
+
+```
+将resources目录下的5个配置文件放入solr服务的Jetty或Tomcat的webapp/WEB-INF/classes/目录下；
+
+① IKAnalyzer.cfg.xml
+② ext.dic
+③ stopword.dic
+④ ik.conf
+⑤ dynamicdic.txt
+```
+
+这里是使用的github上，别人根据原生的ik进行二次开发的jar包，需要拷贝的资源有相应的改变了
+
+### 如何配置的？
+
+配置managed-schem文件：
+
+```xml
+<!-- ik分词器 -->
+<fieldType name="text_ik" class="solr.TextField">
+  <analyzer type="index">
+      <tokenizer class="org.wltea.analyzer.lucene.IKTokenizerFactory" useSmart="false" conf="ik.conf"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+  </analyzer>
+  <analyzer type="query">
+      <tokenizer class="org.wltea.analyzer.lucene.IKTokenizerFactory" useSmart="true" conf="ik.conf"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+  </analyzer>
+</fieldType>
+```
+
+其实应该理解标签`<fieldType>`和`<field>`的区别。`<fieldType>`指定==整个类型的分词器是什么，`<field>`定义的时候相应的需要指定是何种`<fieldType>`，所以确定了分词器==
+
