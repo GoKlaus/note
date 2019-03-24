@@ -145,3 +145,33 @@ tomcat部署solr注意事项
 - tomcat7和solr7不兼容，同样的方法使用tomcat7，访问有异常。
 - core建立的时候，只要复制conf即可启动访问，data和core.properties可以通过窗口创建。
 
+## solr与spring整合
+
+引入jar包
+
+```xml
+ <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-solr</artifactId>
+      <version>1.5.5.RELEASE</version>
+    </dependency>
+```
+
+引入一个jar包
+
+配置solr，加入spring容器
+
+```xml
+ <!--config  solrServer's ip address-->
+    <solr:solr-server id="solrServer" url="http://192.168.179.22:8080/solr/test"/>
+    <!--config solrTemplate ,使用solr模板可对索引库进行CRUD操作-->
+    <bean id="solrTemplate" class="org.springframework.data.solr.core.SolrTemplate">
+        <constructor-arg ref="solrServer"/>
+    </bean>
+```
+
+配置完，就可以在代码中使用`@autowired`直接引入`solrTemplate`使用
+
+## solr7配置ik分词器
+
+主要配置`manage-schema`文件，添加jar包，重启solr即可完成
