@@ -137,12 +137,47 @@ spring3
 #### 注解配置式
 #### xml和注解比较
 ### web配置
+
+==web.xml的作用==：**web.xml文件的作用是配置web工程启动**,对于一个web工程来说，web.xml可以有也可以没有，如果存在web.xml文件；web工程在启动的时候，**web容器(tomcat容器)**会去加载web.xml文件，然后按照一定规则配置web.xml文件中的组件。
+
+==web容器的加载顺序==：ServletContext -> context-param -> listener -> filter ->servlet ;不会因在web.xml中的书写顺序改变：   
+   a、web容器启动后,会去加载web.xml文件，读取listener和context-param两个节点
+   b、创建一个ServletContext（Servlet上下文）这个上下文供所有部分共享
+   c、容器将context-param转换成键值对，交给ServletContext
+   d、接着按照上述顺序继续执行
+
+![img](assets/16787cb36ca9e2dd)
+
+![img](assets/1678bc7b61df1c4f)
+
+**加载顺序** 
+a、首先加载Spring容器加载器：ContextLoaderListener
+
+b、加载过滤器Filter（此处以编码过滤器CharacterEncodingFilter为例）此过滤器的作用就是设置请求参数的编码为UTF-8.
+
+c、加载Servlet：初始化DispatcherServlet，在SpringMVC架构中，DispatchServlet负责请求分发，起到控制器的作用
+
 #### 过滤器
+
+```
+作用：
+```
+
+
+
+
+
 #### xml配置式
 #### 注解配置式
 #### 监听器
+
+[listener学习](other/listener.md)
+
 #### xml配置式
 #### 注解配置式
 #### 控制器
+
+
+
 #### xml配置式
 #### 注解配置式
