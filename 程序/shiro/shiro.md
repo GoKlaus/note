@@ -1,8 +1,6 @@
-# shiro
-
 [TOC]
 
-## 简介
+# 1 简介
 
 Apache Shiro是Java的一个安全框架。目前，使用Apache Shiro的人越来越多，因为它相当简单，对比Spring Security，可能没有Spring Security做的功能强大，但是在实际工作时可能并不需要那么复杂的东西，所以使用小而简单的Shiro就足够了。对于它俩到底哪个好，这个不必纠结，能更简单的解决项目问题就好了。
 
@@ -68,9 +66,9 @@ Shiro可以非常容易的开发出足够好的应用，其不仅可以用在Jav
 
 **Cryptography：**密码模块，Shiro提高了一些常见的加密组件用于如密码加密/解密的。
 
-## shiro用法
+# 2 shiro用法
 
-### shiro相关jar包及作用
+## 2.1 shiro相关jar包及作用
 
 ```xml
 <!-- shiro 核心包-->
@@ -81,7 +79,7 @@ Shiro可以非常容易的开发出足够好的应用，其不仅可以用在Jav
 </dependency>  
 ```
 
-### 身份认证流程
+## 2.2 身份认证流程
 
 先明确几个概念：
 
@@ -93,11 +91,11 @@ Shiro可以非常容易的开发出足够好的应用，其不仅可以用在Jav
 
 ![img](assets/8d639160-cd3e-3b9c-8dd6-c7f9221827a5.png)
 
-####  Realm
+### 2.2.1  Realm
 
-> 域，Shiro从从Realm获取安全数据（如用户、角色、权限），就是说SecurityManager要验证用户身份，那么它需要从Realm获取相应的用户进行比较以确定用户身份是否合法；也需要从Realm得到用户相应的角色/权限进行验证用户是否能进行操作；可以把Realm看成DataSource，即安全数据源。如我们之前的ini配置方式将使用org.apache.shiro.realm.text.IniRealm。Shiro默认提供的Realm
+Realm：域，Shiro从从Realm获取安全数据（如用户、角色、权限），就是说SecurityManager要验证用户身份，那么它需要从Realm获取相应的用户进行比较以确定用户身份是否合法；也需要从Realm得到用户相应的角色/权限进行验证用户是否能进行操作；可以把Realm看成DataSource，即安全数据源。如我们之前的ini配置方式将使用org.apache.shiro.realm.text.IniRealm。
 
-##### Shiro默认提供的Realm
+####  Shiro默认提供的Realm
 
 ![img](assets/34062d4e-8ac5-378a-a9e2-4845f0828292.png)
 
@@ -107,13 +105,44 @@ Shiro可以非常容易的开发出足够好的应用，其不仅可以用在Jav
 
 **org.apache.shiro.realm.jdbc.JdbcRealm：**通过sql查询相应的信息，如“select password from users where username = ?”获取用户密码，“select password, password_salt from users where username = ?”获取用户密码及盐；“select role_name from user_roles where username = ?”获取用户角色；“select permission from roles_permissions where role_name = ?”获取角色对应的权限信息；也可以调用相应的api进行自定义sql
 
-##### 单Realm配置
+####  单Realm配置
 
-##### 多Realm配置
+1、自定义Realm实现
+
+```java
+public class MyRealm1 implements Realm {  
+    @Override  
+    public String getName() {  
+        return "myrealm1";  
+    }  
+    @Override  
+    public boolean supports(AuthenticationToken token) {  
+        //仅支持UsernamePasswordToken类型的Token  
+        return token instanceof UsernamePasswordToken;   
+    }  
+    @Override  
+    public AuthenticationInfo getAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {  
+        String username = (String)token.getPrincipal();  //得到用户名  
+        String password = new String((char[])token.getCredentials()); //得到密码  
+        if(!"zhang".equals(username)) {  
+            throw new UnknownAccountException(); //如果用户名错误  
+        }  
+        if(!"123".equals(password)) {  
+            throw new IncorrectCredentialsException(); //如果密码错误  
+        }  
+        //如果身份认证验证成功，返回一个AuthenticationInfo实现；  
+        return new SimpleAuthenticationInfo(username, password, getName());  
+    }  
+}   
+```
+
+
+
+#### 多Realm配置
 
 ==将这两个知识点记下，主要是想看spring的配置说法==
 
-### Authenticator及AuthenticationStrategy
+## 2.3 Authenticator及AuthenticationStrategy
 
 Authenticator的职责是验证用户帐号，是Shiro API中身份验证核心的入口点： 
 
@@ -138,7 +167,7 @@ SecurityManager接口继承了Authenticator，另外还有一个ModularRealmAuth
 >
 > 配置中指定AuthenticationStrategy接口的实现类，
 
-### 授权
+## 2.4 授权
 
 **主体**
 
@@ -170,9 +199,9 @@ Shiro支持粗粒度权限（如用户模块的所有权限）和细粒度权限
 
 请google搜索==“RBAC”和“RBAC新解”==分别了解==“基于角色的访问控制”“基于资源的访问控制(Resource-Based Access Control)”==。
 
-#### 支持的授权方式
+###2.4.1  支持的授权方式
 
-##### 编程式：通过写if/else授权代码块完成： 
+#### 编程式：通过写if/else授权代码块完成： 
 
 ```java
 Subject subject = SecurityUtils.getSubject();  
@@ -183,7 +212,7 @@ if(subject.hasRole(“admin”)) {
 }   
 ```
 
-##### 注解式：通过在执行的java方法上放置相应的注解完成：
+#### 注解式：通过在执行的java方法上放置相应的注解完成：
 
 ```java
 @RequiresRoles("admin")  
@@ -192,7 +221,7 @@ public void hello() {
 }  
 ```
 
-##### JSP/GSP标签：在JSP/GSP页面通过相应的标签完成：
+#### JSP/GSP标签：在JSP/GSP页面通过相应的标签完成：
 
 ```java
 <shiro:hasRole name="admin">  
@@ -200,36 +229,286 @@ public void hello() {
 </shiro:hasRole> 
 ```
 
-#### 授权
+### 2.4.2 授权
 
-##### 基于角色的访问控制（隐式角色）
+#### 基于角色的访问控制（隐式角色）
 
-##### 基于资源的访问控制（显式角色）
+规则即：==“用户名=密码,角色1，角色2”==，如果需要在应用中判断用户是否有相应角色，就需要在相应的Realm中返回角色信息，也就是说Shiro不负责维护用户-角色信息，需要应用提供，Shiro只是提供相应的接口方便验证，后续会介绍如何动态的获取用户角色。
 
-#### 字符串通配符权限permission
-
-##### 单个资源单个权限
-
-##### 单个资源多个权限
-
-##### 单个资源多个权限
-
-##### 所有资源全部权限
-
-##### 实例级别的权限
-
-###### 单个实例单个权限
-
-###### 单个实例多个权限
-
-###### 单个实例所有权限
-
-###### 所有实例单个权限
-
-###### 所有实例所有权限
+```ini
+[users]  
+zhang=123,role1,role2  
+wang=123,role1  
+[roles]  
+role1=user:create,user:update  
+role2=user:create,user:delete  
+```
 
 
 
+```java
+@Test  
+public void testHasRole() {  
+    login("classpath:shiro-role.ini", "zhang", "123");  
+    //判断拥有角色：role1  
+    Assert.assertTrue(subject().hasRole("role1")); 
+    //判断拥有角色：role1 and role2  
+  Assert.assertTrue(subject().hasAllRoles(Arrays.asList("role1", "role2")));  
+    //判断拥有角色：role1 and role2 and !role3  
+    boolean[] result = subject().hasRoles(Arrays.asList("role1", "role2", "role3"));  
+    Assert.assertEquals(true, result[0]);  
+    Assert.assertEquals(true, result[1]);  
+    Assert.assertEquals(false, result[2]);  
+}   
+```
+
+```java
+@Test(expected = UnauthorizedException.class)  
+public void testCheckRole() {  
+    login("classpath:shiro-role.ini", "zhang", "123");  
+    //断言拥有角色：role1  
+    subject().checkRole("role1");  
+    //断言拥有角色：role1 and role3 失败抛出异常  
+    subject().checkRoles("role1", "role3");  
+}   
+```
+
+==缺点就是如果很多地方进行了角色判断，但是有一天不需要了那么就需要修改相应代码把所有相关的地方进行删除；这就是粗粒度造成的问题。==
+
+#### 基于资源的访问控制（显式角色）
+
+规则：==“用户名=密码，角色1，角色2”“角色=权限1，权限2”==，即首先根据用户名找到角色，然后根据角色再找到权限；即角色是权限集合；Shiro同样不进行权限的维护，需要我们通过Realm返回相应的权限信息。只需要维护“用户——角色”之间的关系即可。
+
+```ini
+[users]  
+zhang=123,role1,role2  
+wang=123,role1  
+[roles]  
+role1=user:create,user:update  
+role2=user:create,user:delete  
+```
 
 
-##### 
+
+```java
+@Test  
+public void testIsPermitted() {  
+    login("classpath:shiro-permission.ini", "zhang", "123");  
+    //判断拥有权限：user:create  
+    Assert.assertTrue(subject().isPermitted("user:create"));  
+    //判断拥有权限：user:update and user:delete  
+  Assert.assertTrue(subject().isPermittedAll("user:update", "user:delete"));  
+    //判断没有权限：user:view  
+  Assert.assertFalse(subject().isPermitted("user:view"));  
+}   
+```
+
+```java
+@Test(expected = UnauthorizedException.class)  
+public void testCheckPermission () {  
+    login("classpath:shiro-permission.ini", "zhang", "123");  
+    //断言拥有权限：user:create  
+    subject().checkPermission("user:create");  
+    //断言拥有权限：user:delete and user:update  
+    subject().checkPermissions("user:delete", "user:update");  
+    //断言拥有权限：user:view 失败抛出异常  
+    subject().checkPermissions("user:view");  
+}   
+```
+
+==这种方式的一般规则是“资源标识符：操作”，即是资源级别的粒度；这种方式的好处就是如果要修改基本都是一个资源级别的修改，不会对其他模块代码产生影响，粒度小。但是实现起来可能稍微复杂点，需要维护“用户——角色，角色——权限（资源：操作）”之间的关系。==
+
+### 2.4.3 permission
+
+### 字符串通配符权限
+
+规则：“资源标识符：操作：对象实例ID”  即对哪个资源的哪个实例可以进行什么操作。其默认支持通配符权限字符串，“:”表示资源/操作/实例的分割；“,”表示操作的分割；“*”表示任意资源/操作/实例。
+
+#### 单个资源单个权限
+
+```java
+subject().checkPermissions("system:user:update");  
+```
+
+用户拥有资源“system:user”的“update”权限。
+
+#### 单个资源多个权限
+
+配置
+
+```ini
+role41=system:user:update,system:user:delete  
+```
+
+```java
+subject().checkPermissions("system:user:update", "system:user:delete");  
+```
+
+用户拥有资源“system:user”的“update”和“delete”权限。
+
+如上可以简写成：
+
+```ini
+role42="system:user:update,delete"   
+```
+
+```java
+subject().checkPermissions("system:user:update,delete");  
+```
+
+通过“system:user:update,delete”验证"system:user:update, system:user:delete"是没问题的，但是反过来是规则不成立。
+
+#### 单个资源全部权限
+
+```ini
+role51="system:user:create,update,delete,view"  
+```
+
+```java
+subject().checkPermissions("system:user:create,delete,update:view");  
+```
+
+可以简写成:
+
+```ini
+role52=system:user:*  
+或者
+role53=system:user  
+```
+
+```java
+subject().checkPermissions("system:user:*");  
+subject().checkPermissions("system:user");   
+```
+
+通过“system:user:*”验证“system:user:create,delete,update:view”可以，但是反过来是不成立的。
+
+#### 所有资源全部权限
+
+```ini
+role61=*:view  
+```
+
+```java
+subject().checkPermissions("user:view");  
+```
+
+#### 实例级别的权限
+
+##### 单个实例单个权限
+
+```ini
+role71=user:view:1 
+```
+
+```java
+subject().checkPermissions("user:view:1");  
+```
+
+
+
+##### 单个实例多个权限
+
+```ini
+role72="user:update,delete:1"  
+```
+
+```java
+subject().checkPermissions("user:delete,update:1"); 
+subject().checkPermissions("user:update:1", "user:delete:1");   
+```
+
+
+
+##### 单个实例所有权限
+
+```ini
+role73=user:*:1  
+```
+
+```java
+subject().checkPermissions("user:update:1", "user:delete:1", "user:view:1");  
+```
+
+
+
+##### 所有实例单个权限
+
+```ini
+role74=user:auth:*  
+```
+
+```java
+subject().checkPermissions("user:auth:1", "user:auth:2");  
+```
+
+
+
+##### 所有实例所有权限
+
+```ini
+role75=user:*:*  
+```
+
+```java
+subject().checkPermissions("user:view:1", "user:auth:2");  
+```
+
+#### Shiro对权限字符串缺失部分的处理
+
+如“user:view”等价于“user:view:*”；而“organization”等价于“organization:*”或者“organization:*:*”。可以这么理解，这种方式实现了前缀匹配。
+
+另外如“user:*”可以匹配如“user:delete”、“user:delete”可以匹配如“user:delete:1”、“user:*:1”可以匹配如“user:view:1”、“user”可以匹配“user:view”或“user:view:1”等。即*可以匹配所有，不加*可以进行前缀匹配；但是如“*:view”不能匹配“system:user:view”，需要使用“*:*:view”，即后缀匹配必须指定前缀（多个冒号就需要多个*来匹配）。
+
+####  WildcardPermission
+
+如下两种方式是等价的：
+
+```java
+subject().checkPermission("menu:view:1");  
+subject().checkPermission(new WildcardPermission("menu:view:1"));  
+```
+
+#### 性能问题
+
+通配符匹配方式比字符串相等匹配来说是更复杂的，因此需要花费更长时间，但是一般系统的权限不会太多，且可以配合缓存来提供其性能，如果这样性能还达不到要求我们可以实现位操作算法实现性能更好的权限匹配。另外实例级别的权限验证如果数据量太大也不建议使用，可能造成查询权限及匹配变慢。可以考虑比如在sql查询时加上权限字符串之类的方式在查询时就完成了权限匹配。
+
+###  2.4.4 授权流程
+
+##### ![img](assets/541e4da3-d1a5-3d13-83a6-b65c3596ee4e.png)
+
+流程如下：
+
+1、首先调用Subject.isPermitted*/hasRole*接口，其会委托给SecurityManager，而SecurityManager接着会委托给Authorizer；
+
+2、Authorizer是真正的授权者，如果我们调用如isPermitted(“user:view”)，其首先会通过PermissionResolver把字符串转换成相应的Permission实例；
+
+3、在进行授权之前，其会调用相应的Realm获取Subject相应的角色/权限用于匹配传入的角色/权限；
+
+4、Authorizer会判断Realm的角色/权限是否和传入的匹配，如果有多个Realm，会委托给ModularRealmAuthorizer进行循环判断，如果匹配如isPermitted*/hasRole*会返回true，否则返回false表示授权失败。
+
+ 
+
+ModularRealmAuthorizer进行多Realm匹配流程：
+
+1、首先检查相应的Realm是否实现了实现了Authorizer；
+
+2、如果实现了Authorizer，那么接着调用其相应的isPermitted*/hasRole*接口进行匹配；
+
+3、如果有一个Realm匹配那么将返回true，否则返回false。
+
+ 
+
+如果Realm进行授权的话，应该继承AuthorizingRealm，其流程是：
+
+1.1、如果调用hasRole*，则直接获取AuthorizationInfo.getRoles()与传入的角色比较即可；
+
+1.2、首先如果调用如isPermitted(“user:view”)，首先通过PermissionResolver将权限字符串转换成相应的Permission实例，默认使用WildcardPermissionResolver，即转换为通配符的WildcardPermission；
+
+2、通过AuthorizationInfo.getObjectPermissions()得到Permission实例集合；通过AuthorizationInfo. getStringPermissions()得到字符串集合并通过PermissionResolver解析为Permission实例；然后获取用户的角色，并通过RolePermissionResolver解析角色对应的权限集合（默认没有实现，可以自己提供）；
+
+3、接着调用Permission. implies(Permission p)逐个与传入的权限比较，如果有匹配的则返回true，否则false。 
+
+### 2.4.5 Authorizer、PermissionResolver及RolePermissionResolver
+
+Authorizer的职责是进行授权（访问控制），是Shiro API中授权核心的入口点，其提供了相应的角色/权限判断接口，具体请参考其Javadoc。SecurityManager继承了Authorizer接口，且提供了ModularRealmAuthorizer用于多Realm时的授权匹配。PermissionResolver用于解析权限字符串到Permission实例，而RolePermissionResolver用于根据角色解析相应的权限集合。
