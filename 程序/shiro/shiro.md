@@ -136,11 +136,72 @@ public class MyRealm1 implements Realm {
 }   
 ```
 
+2、ini配置文件指定自定义Realm实现(shiro-realm.ini) 
 
+```ini
+#声明一个realm  
+myRealm1=com.github.zhangkaitao.shiro.chapter2.realm.MyRealm1  
+#指定securityManager的realms实现  
+securityManager.realms=$myRealm1   
+```
+
+通过$name来引入之前的realm定义
 
 #### 多Realm配置
 
-==将这两个知识点记下，主要是想看spring的配置说法==
+1、ini配置文件（shiro-multi-realm.ini）  
+
+```ini
+#声明一个realm  
+myRealm1=com.github.zhangkaitao.shiro.chapter2.realm.MyRealm1  
+myRealm2=com.github.zhangkaitao.shiro.chapter2.realm.MyRealm2  
+#指定securityManager的realms实现  
+securityManager.realms=$myRealm1,$myRealm2   
+```
+
+securityManager会按照realms指定的顺序进行身份认证。此处我们使用显示指定顺序的方式指定了Realm的顺序，如果删除“securityManager.realms=$myRealm1,$myRealm2”，那么securityManager会按照realm声明的顺序进行使用（即无需设置realms属性，其会自动发现），当我们显示指定realm后，其他没有指定realm将被忽略，如“securityManager.realms=$myRealm1”，那么myRealm2不会被自动设置进去。
+
+#### JDBC Realm使用
+
+1、数据库及依赖
+
+```xml
+<dependency>  
+    <groupId>mysql</groupId>  
+    <artifactId>mysql-connector-java</artifactId>  
+    <version>5.1.25</version>  
+</dependency>  
+<dependency>  
+    <groupId>com.alibaba</groupId>  
+    <artifactId>druid</artifactId>  
+    <version>0.2.23</version>  
+</dependency>   
+```
+
+本文将使用mysql数据库及druid连接池； 
+
+2、到数据库shiro下建三张表：users（用户名/密码）、user_roles（用户/角色）、roles_permissions（角色/权限），具体请参照shiro-example-chapter2/sql/shiro.sql；并添加一个用户记录，用户名/密码为zhang/123；
+
+3、ini配置（shiro-jdbc-realm.ini） 
+
+```ini
+jdbcRealm=org.apache.shiro.realm.jdbc.JdbcRealm  
+dataSource=com.alibaba.druid.pool.DruidDataSource  
+dataSource.driverClassName=com.mysql.jdbc.Driver  
+dataSource.url=jdbc:mysql://localhost:3306/shiro  
+dataSource.username=root  
+#dataSource.password=  
+jdbcRealm.dataSource=$dataSource  
+securityManager.realms=$jdbcRealm   
+```
+
+1、变量名=全限定类名会自动创建一个类实例
+
+2、变量名.属性=值 自动调用相应的setter方法进行赋值
+
+3、$变量名 引用之前的一个对象实例 
+
+4、测试代码请参照com.github.zhangkaitao.shiro.chapter2.LoginLogoutTest的testJDBCRealm方法，和之前的没什么区别。
 
 ## 2.3 Authenticator及AuthenticationStrategy
 
@@ -512,3 +573,210 @@ ModularRealmAuthorizer进行多Realm匹配流程：
 ### 2.4.5 Authorizer、PermissionResolver及RolePermissionResolver
 
 Authorizer的职责是进行授权（访问控制），是Shiro API中授权核心的入口点，其提供了相应的角色/权限判断接口，具体请参考其Javadoc。SecurityManager继承了Authorizer接口，且提供了ModularRealmAuthorizer用于多Realm时的授权匹配。PermissionResolver用于解析权限字符串到Permission实例，而RolePermissionResolver用于根据角色解析相应的权限集合。
+
+我们可以通过如下ini配置更改Authorizer实现：
+
+```ini
+authorizer=org.apache.shiro.authz.ModularRealmAuthorizer  
+securityManager.authorizer=$authorizer   
+```
+
+对于ModularRealmAuthorizer，相应的AuthorizingSecurityManager会在初始化完成后自动将相应的realm设置进去，我们也可以通过调用其setRealms()方法进行设置。对于实现自己的authorizer可以参考ModularRealmAuthorizer实现即可，在此就不提供示例了。
+
+设置ModularRealmAuthorizer的permissionResolver，其会自动设置到相应的Realm上（其实现了PermissionResolverAware接口），如：
+
+```ini
+permissionResolver=org.apache.shiro.authz.permission.WildcardPermissionResolver  
+authorizer.permissionResolver=$permissionResolver   
+```
+
+设置ModularRealmAuthorizer的rolePermissionResolver，其会自动设置到相应的Realm上（其实现了RolePermissionResolverAware接口），如：
+
+```ini
+rolePermissionResolver=com.github.zhangkaitao.shiro.chapter3.permission.MyRolePermissionResolver  
+authorizer.rolePermissionResolver=$rolePermissionResolver   
+```
+
+**示例**
+
+> 1、ini配置（shiro-authorizer.ini）
+>
+> ```ini
+> [main]  
+> #自定义authorizer  
+> authorizer=org.apache.shiro.authz.ModularRealmAuthorizer  
+> #自定义permissionResolver  
+> #permissionResolver=org.apache.shiro.authz.permission.WildcardPermissionResolver  
+> permissionResolver=com.github.zhangkaitao.shiro.chapter3.permission.BitAndWildPermissionResolver  
+> authorizer.permissionResolver=$permissionResolver  
+> #自定义rolePermissionResolver  
+> rolePermissionResolver=com.github.zhangkaitao.shiro.chapter3.permission.MyRolePermissionResolver  
+> authorizer.rolePermissionResolver=$rolePermissionResolver  
+> securityManager.authorizer=$authorizer  
+> ```
+
+>```ini
+>#自定义realm 一定要放在securityManager.authorizer赋值之后（因为调用setRealms会将realms设置给authorizer，并给各个Realm设置permissionResolver和rolePermissionResolver）  
+>realm=com.github.zhangkaitao.shiro.chapter3.realm.MyRealm  
+>securityManager.realms=$realm   
+>```
+>
+>设置securityManager 的realms一定要放到最后，因为在调用SecurityManager.setRealms时会将realms设置给authorizer，并为各个Realm设置permissionResolver和rolePermissionResolver。另外，不能使用IniSecurityManagerFactory创建的IniRealm，因为其初始化顺序的问题可能造成后续的初始化Permission造成影响。
+>
+>2、定义BitAndWildPermissionResolver及BitPermission
+>
+>BitPermission用于实现位移方式的权限，如规则是：
+>
+>权限字符串格式：+资源字符串+权限位+实例ID；以+开头中间通过+分割；权限：0 表示所有权限；1 新增（二进制：0001）、2 修改（二进制：0010）、4 删除（二进制：0100）、8 查看（二进制：1000）；如 +user+10 表示对资源user拥有修改/查看权限。
+>
+>```java
+>public class BitPermission implements Permission {  
+>    private String resourceIdentify;  
+>    private int permissionBit;  
+>    private String instanceId;  
+>    public BitPermission(String permissionString) {  
+>        String[] array = permissionString.split("\\+");  
+>        if(array.length > 1) {  
+>            resourceIdentify = array[1];  
+>        }  
+>        if(StringUtils.isEmpty(resourceIdentify)) {  
+>            resourceIdentify = "*";  
+>        }  
+>        if(array.length > 2) {  
+>            permissionBit = Integer.valueOf(array[2]);  
+>        }  
+>        if(array.length > 3) {  
+>            instanceId = array[3];  
+>        }  
+>        if(StringUtils.isEmpty(instanceId)) {  
+>            instanceId = "*";  
+>        }  
+>    }  
+>  
+>    @Override  
+>    public boolean implies(Permission p) {  
+>        if(!(p instanceof BitPermission)) {  
+>            return false;  
+>        }  
+>        BitPermission other = (BitPermission) p;  
+>        if(!("*".equals(this.resourceIdentify) || this.resourceIdentify.equals(other.resourceIdentify))) {  
+>            return false;  
+>        }  
+>        if(!(this.permissionBit ==0 || (this.permissionBit & other.permissionBit) != 0)) {  
+>            return false;  
+>        }  
+>        if(!("*".equals(this.instanceId) || this.instanceId.equals(other.instanceId))) {  
+>            return false;  
+>        }  
+>        return true;  
+>    }  
+>}   
+>```
+>
+>Permission接口提供了boolean implies(Permission p)方法用于判断权限匹配的；
+>
+>```java
+>public class BitAndWildPermissionResolver implements PermissionResolver {  
+>    @Override  
+>    public Permission resolvePermission(String permissionString) {  
+>        if(permissionString.startsWith("+")) {  
+>            return new BitPermission(permissionString);  
+>        }  
+>        return new WildcardPermission(permissionString);  
+>    }  
+>}   
+>```
+>
+>BitAndWildPermissionResolver实现了PermissionResolver接口，并根据权限字符串是否以“+”开头来解析权限字符串为BitPermission或WildcardPermission。
+>
+>3、定义MyRolePermissionResolver
+>
+>RolePermissionResolver用于根据角色字符串来解析得到权限集合。
+>
+>```java
+>public class MyRolePermissionResolver implements RolePermissionResolver {  
+>    @Override  
+>    public Collection<Permission> resolvePermissionsInRole(String roleString) {  
+>        if("role1".equals(roleString)) {  
+>            return Arrays.asList((Permission)new WildcardPermission("menu:*"));  
+>        }  
+>        return null;  
+>    }  
+>}   
+>```
+>
+>4、自定义Realm
+>
+>```java
+>public class MyRealm extends AuthorizingRealm {  
+>    @Override  
+>    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {  
+>        SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();  
+>        authorizationInfo.addRole("role1");  
+>        authorizationInfo.addRole("role2");  
+>        authorizationInfo.addObjectPermission(new BitPermission("+user1+10"));  
+>        authorizationInfo.addObjectPermission(new WildcardPermission("user1:*"));  
+>        authorizationInfo.addStringPermission("+user2+10");  
+>        authorizationInfo.addStringPermission("user2:*");  
+>        return authorizationInfo;  
+>    }  
+>    @Override  
+>    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {  
+>        //和com.github.zhangkaitao.shiro.chapter2.realm.MyRealm1. getAuthenticationInfo代码一样，省略  
+>}  
+>}   
+>```
+>
+>此时我们继承AuthorizingRealm而不是实现Realm接口；推荐使用AuthorizingRealm，因为：
+>
+>AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token)：表示获取身份验证信息；
+>
+>AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals)：表示根据用户身份获取授权信息。
+>
+>这种方式的好处是当只需要身份验证时只需要获取身份验证信息而不需要获取授权信息。对于AuthenticationInfo和AuthorizationInfo请参考其Javadoc获取相关接口信息。
+>
+> 
+>
+>另外我们可以使用JdbcRealm，需要做的操作如下：
+>
+>1、执行sql/ shiro-init-data.sql 插入相关的权限数据；
+>
+>2、使用shiro-jdbc-authorizer.ini配置文件，需要设置jdbcRealm.permissionsLookupEnabled
+>
+>为true来开启权限查询。
+>
+> 
+>
+>此次还要注意就是不能把我们自定义的如“+user1+10”配置到INI配置文件，即使有IniRealm完成，因为IniRealm在new完成后就会解析这些权限字符串，默认使用了WildcardPermissionResolver完成，即此处是一个设计权限，如果采用生命周期（如使用初始化方法）的方式进行加载就可以解决我们自定义permissionResolver的问题。
+>
+>5、测试用例
+>
+>```java
+>public class AuthorizerTest extends BaseTest {  
+>  
+>    @Test  
+>    public void testIsPermitted() {  
+>        login("classpath:shiro-authorizer.ini", "zhang", "123");  
+>        //判断拥有权限：user:create  
+>        Assert.assertTrue(subject().isPermitted("user1:update"));  
+>        Assert.assertTrue(subject().isPermitted("user2:update"));  
+>        //通过二进制位的方式表示权限  
+>        Assert.assertTrue(subject().isPermitted("+user1+2"));//新增权限  
+>        Assert.assertTrue(subject().isPermitted("+user1+8"));//查看权限  
+>        Assert.assertTrue(subject().isPermitted("+user2+10"));//新增及查看  
+>  
+>        Assert.assertFalse(subject().isPermitted("+user1+4"));//没有删除权限  
+>  
+>        Assert.assertTrue(subject().isPermitted("menu:view"));//通过MyRolePermissionResolver解析得到的权限  
+>    }  
+>}   
+>```
+
+# 3 ini配置
+
+之前章节我们已经接触过一些INI配置规则了，如果大家使用过如Spring之类的IoC/DI容器的话，Shiro提供的INI配置也是非常类似的，即可以理解为是一个IoC/DI容器，但是区别在于它从一个根对象securityManager开始。
+
+ 
+
+
+
