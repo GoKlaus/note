@@ -360,7 +360,7 @@ StoreLoad Barriers是一个“全能型”的屏障，它同时具有其他3个�
 - 由Java内存模型来直接保证的原子性变量操作包括read、load、assign、use、store、write，我们大致可以认为基本数据类型变量、引用类型变量、声明为volatile的任何类型变量的访问读写是具备原子性的（long和double的非原子性协定：对于64位的数据，如long和double，Java内存模型规范允许虚拟机将没有被volatile修饰的64位数据的读写操作划分为两次32位的操作来进行，即允许虚拟机实现选择可以不保证64位数据类型的load、store、read和write这四个操作的原子性，即如果有多个线程共享一个并未声明为volatile的long或double类型的变量，并且同时对它们进行读取和修改操作，那么某些线程可能会读取到一个既非原值，也不是其他线程修改值的代表了“半个变量”的数值。但由于目前各种平台下的商用虚拟机几乎都选择把64位数据的读写操作作为原子操作来对待，因此在编写代码时一般也不需要将用到的long和double变量专门声明为volatile）。这些类型变量的读、写天然具有原子性，但类似于 “基本变量++” / “volatile++” 这种复合操作并没有原子性。
 - 如果应用场景需要一个更大范围的原子性保证，需要使用同步块技术。Java内存模型提供了lock和unlock操作来满足这种需求。虚拟机提供了字节码指令monitorenter和monitorexist来隐式地使用这两个操作，这两个字节码指令反映到Java代码中就是同步快——synchronized关键字。
 
-## **JMM对特殊Java语义的特殊规则支持**
+#### JMM对特殊Java语义的特殊规则支持
 
 [volatile总结](https://link.zhihu.com/?target=http%3A//mp.weixin.qq.com/s%3F__biz%3DMzI3NzM2OTQ5Mg%3D%3D%26mid%3D2247484289%26idx%3D1%26sn%3Dbdf6721e01c613bfb1458a8584e80800%26chksm%3Deb66047adc118d6c395c14e5b953686bfdfac93fd6fa8c0731bb89aadd7437bba800d034659d%26scene%3D21%23wechat_redirect) （保证内存可见性：Lock前缀的指令、内存屏障禁止重排序）
 
@@ -552,4 +552,4 @@ Java 中可以使用 `volatile` 来保证顺序性，`synchronized 和 lock` 也
 
 posix.1严格定义的异步IO是要求没有任何一点阻塞，而上述的前面四个（阻塞IO，非阻塞IO，IO复用，信号驱动）都不同程度阻塞了，而且都有一个共同的阻塞： 内核拷贝数据到进程空间的这段时间需要等待。
 
-# 22.图形化用户界面
+# 22.图形化用户界面  
