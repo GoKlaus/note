@@ -132,6 +132,147 @@ Java使用Class对象来执行其RTTI
 ***
 
 # 15.泛型
+
+​		一般的类和方法，只能使用具体的类型：要么是基本类型，要么是自定义的类。如果要编写可应用于多种类型的代码，那么这种刻板的限制对代码的束缚就会很大。
+
+​		在面向对象编程语言中，多态算是一种**泛化机制**。将参数类型设置为基类，方法就可以接受从这个基类中导出的任何类作为参数。这样的方法更通用。但是，考虑到**final**类不能扩展，其他任何类都可以被扩展，所以这种灵活性大多时候 也会有一些性能损耗。
+
+​		拘泥于单继承体系，会使程序受限太多。如果方法的参数是一个接口，而不是一个类，这种限制就放松了很多。但有时接口也是对程序的约束还是太强了，一旦指明了接口，就需要使用特定的接口。这里就需要一种“某种不具体的类型”，来编写更通用的代码，而不是一个具体的类或接口
+
+​		泛型的概念：Java SE5 引入的改变。泛型实现了==参数化类型==的概念，使代码可以应用于多种类型。 ==解耦类或方法与所使用的的类型之间的约束==。
+
+## 15.2 简单泛型
+
+泛型对与容器类：
+
+```java
+class Automobile{}
+
+public class Holder1{
+    private Automobile a;
+    public Holder1(Automobile a){
+        this.a = a;
+    }
+    public getAutomobile(){
+        return a;
+    }
+}
+```
+
+这个类可重用性就不好，无法持有其他类型的任何对象
+
+Java SE5 之前可以通过这个持有Object类型的对象来扩大适用范围。
+
+泛型的主要目的是用来指定容器要持有什么样的对象，而且由编译器来保证类型的正确性：
+
+```java
+public class Holder3<T>{
+    private T a;
+    public Holder3(T a){this.a = a;}
+    public void set(T a){this.a = a;}
+    public T get(){return a;}
+    public static void main(String[] args){
+        Holder3<Automobile> h3 = new Holder3<Automobile>(new Automobile());
+        Automobile a = h3.get();
+    }
+}
+```
+
+使用时必要在<>尖括号中指明想要持有什么样子的类型：即告诉编译器，想要使用什么样的类型，让编译器帮处理一切细节。
+
+### 15.2.1 一个元组类库
+
+​	**元祖(tuple)**的概念：将一组对象直接打包存储于其中一个单一对象，这个容器对象允许读取其中的元素，但是不允许向其中存放新的元素。 (这个概念也称为**数据传送对象**，或**信使**) 
+
+> 和DTO有些类似的感觉
+
+```java
+//不使用泛型
+public class TwoTuple1{
+    public final Item a;
+    public final Price b;
+    public TwoTuple1(Item a,Price b){
+        this.a = a;
+        this.b = b;
+    }
+}
+//使用泛型
+public class TwoTuple2<A,B>{
+    public final A first;
+    public final B second;
+}
+```
+
+从适用性上的扩展是泛型带来显性的改变
+
+这里使用public修饰符是否违反Java编程的安全性原则？
+
+不使用访问器和修改器(get和set)，使用final后，就无法将其他的值赋予first和second。
+
+可以通过继承机制来实现长度更长的元组：
+
+```java
+public class ThreeTuple<A,B,C> extends TwoTuple2<A,B>{
+    public final C third;
+    public ThreeTuple(A a,B b,C c){
+        super(a,b);
+        this.third = c;
+    }
+}
+public class FourTuple<A,B,C,D> extends ThreeTuple<A,B,C>{
+    ////
+}
+```
+
+### 15.2.1 一个堆栈类
+
+​		一个内部链式存储机制：
+
+```java
+public class LinkedStack<T>{
+    private static class Node<U>{
+        U item;
+        Node<U> next;
+        Node(){
+            item = null;
+            next = null;
+        }
+        Node(U item,Node(U) next){
+            this.item = item;
+            this.next = next;
+        }
+        boolean end(){return item == null && next == null;}
+    }
+    private Node<T> top = new Node<T>();//End sentinel
+    public void push(T item ){
+        top = new Node<T>(item,top);
+    }
+    public T top(){
+        T result = top.item;
+        if(!top.end()
+           top = top.next;
+       	return result;
+    }
+    public void main(String[] args){
+        LinkedStack<String> lss = new LinkedStack<String>();
+        for(String s : "Phasers or stun!".split(" ")){
+            lss.push(s);
+        String s;
+        while((s = lss.pop()) != null){
+            System.out.println(S);
+        }
+    }
+}
+```
+
+
+
+
+
+
+
+
+
 # 16.数组
 # 17.容器深入研究
 # 18.Java I/O系统
