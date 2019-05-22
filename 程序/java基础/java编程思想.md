@@ -237,7 +237,7 @@ public class LinkedStack<T>{
             item = null;
             next = null;
         }
-        Node(U item,Node(U) next){
+        Node(U item,Node<U> next){
             this.item = item;
             this.next = next;
         }
@@ -263,6 +263,10 @@ public class LinkedStack<T>{
         }
     }
 }
+```
+
+```java
+
 ```
 
 
