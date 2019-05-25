@@ -265,19 +265,188 @@ public class LinkedStack<T>{
 }
 ```
 
+内部类Node也是一个泛型，拥有自己的泛型参数。
+
+该例子使用了末端哨兵(end sentinel)来判断堆栈何时为空，每次调用一次push()方法，就会创建一个Node<T>对象，并将其链接到前一个Node<T>对象。
+
+### 15.2.3 RandomList
+
+假设需要一个持有特定类型对象的列表，每次调用其上的select()方法时，它可以随机选取一个元素。
+
 ```java
+import java.util.*;
+
+public class RandomList<T>{
+    private Arraylist<T> storage = new ArrayList<T>();
+    private Random rand = new Random(47);
+    public void add(T item){ storage.add(item);}
+    public T select(){
+        return storage.get(rand.nextInt(storage.size());)
+    }
+    public static void main(String[] args){
+        RandomList<String> rs = new RandomList<String>();
+        for(String s : ("The quick brown fox jumped over " +
+                        "the lazy brown dog").split(" "))
+            rs.add(s);
+        for(int i = 0; i < 11; i++)
+            System.out.println(rs.select() + "");
+    }
+}
 
 ```
 
+## 15.3 泛型接口
 
+泛型在接口的应用，例如生成器(generator)，这是一种专门负责创建对象的类。实际上，这是工厂方法设计模式的一种应用。不过，生成器常见新的对象时，他不需要任何的参数，而工厂方法一般需要参数。
 
+```java
+pulic interface Generator<T> { T next();}
+```
 
+```java
+public class CoffeeGenerator implements Generator<Coffee>, Iterable<Coffee>{
+    private Class[] types = {Latte.class,Mocha.class,Cappuccino.class,Americano.class,Breva,class};
+    private static Random rand = new Random(47);
+    public CoffeeGenerator(){}
+    
+    private int size = 0;
+    public CoffeeGenerator(int sz){ size = sz;}
+    public Coffee Next(){
+        try{
+            return (Coffee)type[rand.nextInt(types.length)].newInstance();
+        }catch(Exception e){
+            throw new RnuTimeException(e);
+        }
+    }
+    class CoffeeIterator implements Iterator<Coffee>{
+        int count = size;
+        public boolean hasNext(){
+            count --;
+            return CoffeeGenerator.this.next();
+        }
+        public void remove(){
+            throw new UnsupportedOperationException();
+        }
+    }
+    public Iterator<Coffee> iterator(){
+        return new CoffeeIterator();
+    }
+    public static void main(String[] args){
+        CoffeeGenerator gen = new CoffeeGenerator();
+        for(int i = 0;i < 5; i++){
+            System.out.println(gen.next());
+        }
+        for(Coffee c : new CoffeeGenerator(5)){
+            System.out.println(c);
+        }
+    }
+}
+```
+
+参数化的Generator接口确保next()的返回值是参数类型。CoffeeGenerator同事还实现了Iterable接口，说以在循环语句中使用。不过它还需要一个“末端哨兵”来判断何时停止，这是第二个构造器的功能。
+
+```java
+public class Fibonacci implements Generator<Integer>{
+    private int count = 0;
+    public Integer next(){return fib(count++);}
+    private int fib(int n){
+        if(n<2) return 1;
+        return fib(n-2) + fib(n-1);
+    }
+    public static void main(String[] args){
+        Fibonacci gen = new Fibonacci();
+        for(int i = 0; i < 18; i++){
+            System.out.println(gen.next() + " ");
+        }
+    }
+}
+```
+
+在Fibnoacci类的里里外外使用的都是int类型，但是参数都是Integer——Java泛型的一个局限性：基本类型无法作为类型参数。  从Java SE5具备了自动打包和自动拆包的功能。
+
+## 15.4 泛型方法
+
+泛型用在方法上——是否拥有泛型方法，与其所在的类是否是泛型没有关系。
+
+对于一个static方法而言，无法访问泛型类的类型参数，所以，如果static方法需要使用泛型能力，就必须使其成为泛型方法。
+
+```java
+public class GenericMethods {
+    public <T> void f(T x){
+        System.out.println(x.getClass().getName());
+    }
+    public void main(String[] args){
+        GenericMethods gm = new GenericMethods();
+        gm.f(" ");
+        gm.f(1);
+        gm.f(1.0);
+        gm.f(1.0F);
+        gm.f('c');
+        gm.f(gm);
+    }
+}
+```
+
+在使用泛型类时，必须在创建对象的时候指定类型参数的值，而使用泛型方法的时候，通常不必指明参数类型，因为编译器会为我们找出具体的类型。这称为**类型参数推断(type argument inference)**。
+
+f()调用基本类型的时候，自动打包机制就会介入其中。
+
+### 15.4.1 杠杆利用类型参数推断
+
+```java
+Map<Person, List<? extends Pet>> petPeople = 
+    new HashMap<Person, List<? extends Pet>>();
+```
+
+显式的类型说明
+
+泛型方法中可以显式的指明类型，不过这种语法很少见，要显式的指明类型，必须在点操作符与方法名之间插入尖括号，然后把类型置于尖括号内，如果是在定义该方法的内部必须在点操作符之前使用this关键字，如果是使用static的方法，必须在点操作符之前加上类名。
+
+### 15.4.2 可变参数与泛型方法
+
+泛型方法和可变参数列表能够很好的共存
+
+```java
+public class GenericVarargs{
+    public static <T> List<T> makeList(T... args){
+        List<T> result = new ArrayList<T>();
+        for(T item : args)
+            reustlt.add(item);
+        return result;
+    }
+    public static void main (String[] args){
+        List<String> ls = makeList("A");
+        System.out.println(ls);
+        ls = makeList("A","B","C");
+        System.out.println(ls);
+    }
+}
+```
+
+### 15.4.3 用于Generator的泛型方法
+
+### 15.4.4 一个通用的Generator
+
+### 15.4.5 简化元组的使用
+
+### 15.4.6 一个Set使用工具
+
+## 15.5 匿名内部类
+
+## 15.6 构建复杂模型
+
+## 15.7 擦除的神秘之处
 
 
 
 
 
 # 16.数组
+
+
+
+
+
 # 17.容器深入研究
 # 18.Java I/O系统
 # 19.枚举类型
