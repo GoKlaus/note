@@ -29,4 +29,19 @@
    >>
    >> 这种写法是默认加载${user.home}下的文件，对于win系统来说${user.home}指的是当前操作系统用户目录，如 Win7系统 Administrator的用户目录就是 C:\Users\Administrator
    >>
-   >> 
+
+
+
+# dubbo-admin
+
+## 搭建dubbo-admin的注意事项
+
+### 1、dubbo-admin
+
+使用github上的dubbo-admin项目来搭建
+
+编译缓慢，而且需要nodejs来编译，且报错，后续没有继续采用这个方法
+
+### 2、dubbo
+
+直接将2.5.x版本的dubbo源码下载下来，然后编译了dubbo-admin部分，成功搭建了dubbo-admin

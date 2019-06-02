@@ -141,6 +141,12 @@ Java使用Class对象来执行其RTTI
 
 ​		泛型的概念：Java SE5 引入的改变。泛型实现了==参数化类型==的概念，使代码可以应用于多种类型。 ==解耦类或方法与所使用的的类型之间的约束==。
 
+## 15.1 与C++的比较
+
+
+
+
+
 ## 15.2 简单泛型
 
 泛型对与容器类：
@@ -436,6 +442,124 @@ public class GenericVarargs{
 ## 15.6 构建复杂模型
 
 ## 15.7 擦除的神秘之处
+
+ **在泛型代码内部，无法获取任何有关泛型参数类型的信息。**
+
+Java泛型是使用擦除来实现的，List<Stirng>和 List<Integer>在运行时事实上是相同的类型，两种形式都被擦除成原生的“List”类型。
+
+### 15.7.1 C++的方式
+
+C++没有擦除
+
+```c++
+#include<iostream>
+using namespace std;
+template<class T> class Manipulator {
+    T obj;
+    public:
+    	Manipulator(T x) { obj = x; }
+    	void manipulator { obj.f();}
+};
+class HasF {
+    public:
+    	void f() { cout << "HasF :: f()" << endl;}
+};
+int main() {
+    HasF hf;
+    Manipulator<HasF> manipulator(hf);
+    manipulator.manipulator();
+}
+```
+
+当实例化这个模板的时候，C++编译器将进行检查。在Manipulator<HasF>被实例化的这一刻，会检查到HasF拥有f()这个方法。如果情况并非如此，就会得到一个编译期错误。
+
+```java
+public class HasF {
+    public void f() {
+        System.out.println("HasF.f()");
+    }
+}
+
+class Manipulato<T> {
+    T obj;
+    public Manipulator(T x) {
+        obj = x;
+    }
+    public void manipulator() {
+        obj.f();
+    }
+}
+```
+
+这是错误的表达，因为有了擦除，Java编译器无法将manipulator()必须能够在obj上调用f()这一需求映射到HasF拥有f()上。
+
+为了完成上述功能，引入了**泛型类边界的概念**：告诉编译器只能遵守这个边界的类型，重用extends关键字
+
+```java
+class Manipulator<T extends HasF> {
+    T obj;
+    public Manipulator(T x) { obj = x; }
+    public void manipulator() { obj.f(); }
+}
+```
+
+**泛型类型参数**将擦除到他的第一个边界(可能会有多个边界),**类型参数**的擦除，代码解释：
+
+```java
+class Manipulator<T extends HasF> {
+    T obj;
+    public Manipulator(T x) { obj = x; }
+    public void manipulator() { obj.f(); }
+}
+//编译器实际上会把类型参数替换为它的擦除，T擦除到了HasF，就好像在类的声明中用HasF替换掉了T一样
+//在上述例子中，泛型没有贡献任何好处。只需很容易的自己去擦除。就可以创建出没有泛型的类：
+
+class Manipulator3 {
+    private HasF obj;
+    public Manipulator3() { obj = x; }
+    public void manipulator() {
+        obj.f();
+    }
+}
+```
+
+以上的例子很好的体现了一点：当你希望使用的类型参数比某个更具体的类型(以及他的所有的子类型)更加泛化的时候
+
+###  15.7.2 迁移兼容性
+
+泛型类型只有在静态类型检查期间才出现，在此之后，程序中所有的泛型类型都将被擦除，例如
+
+List<T> ------>  List
+
+而普通的类型变量在未指定边界的情况下将被擦除为Object。
+
+擦除的核心动机是泛化的客户端可以用非泛化的类库来使用，反之亦然。------>迁移兼容性
+
+### 15.7.3  擦除的问题
+
+擦除的代价是显著的，泛型不能用于显式的引用运行时的类型的操作中，例如转型、instanceof操作和new表达式，
+
+### 15.7.4 边界处的动作
+
+擦除带来的困惑，可以表示没有任何意义的事务。
+
+```java
+public class ArrayMaker<T> {
+    private Class<T> kind;
+    public ArrayMaker(Class<T> kind) { this.kind = kind; }
+    @SuppressWarnings("unchenked")
+    T[] create(int size) {
+        return (T[])Array.newInstance(kind, size);
+    }
+    public static void main(Stirng[] args) {
+        ArrayMaker<String> stringMaker = new ArrayMaker<String>(String.class);
+        String[] stringArray = stringMaker.create();
+        System.out.println(Arrays.toString(stringArray));
+    }
+}
+```
+
+
 
 
 
