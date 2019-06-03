@@ -16,6 +16,25 @@ springboot的三大组件的配置方式忘了怎么使用了，
 
 
 
+配置shiro  
+
 realm
 
 credentialsmatcher
+
+
+
+# 6/3
+
+遇到配置文件外置失败，之前做过相关的，时间长了忘记了，重新又复习了一下，主要是maven的理解不深
+
+
+
+@suppresswarnins注释的作用 
+
+配置消息转换器
+
+配置跨域filter
+
+thymeleaf页面没有渲染成功
+
