@@ -38,3 +38,6 @@ credentialsmatcher
 
 thymeleaf页面没有渲染成功
 
+# 6/4
+
+equals 和 equalsIgnoreCase 的区别
