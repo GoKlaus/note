@@ -181,3 +181,17 @@ c、加载Servlet：初始化DispatcherServlet，在SpringMVC架构中，Dispatc
 
 #### xml配置式
 #### 注解配置式
+
+
+
+
+
+
+
+需要说明的是 Spring Boot 2.0 已经不再支持使用继承WebMvcConfigurerAdapter 来实现MVC 配置了
+
+
+
+
+
+使用了thymeleaf所以，使用mvc的自然是无用的，必须要修改为thymeleaf才行

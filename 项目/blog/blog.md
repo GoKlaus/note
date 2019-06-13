@@ -41,3 +41,19 @@ thymeleaf页面没有渲染成功
 # 6/4
 
 equals 和 equalsIgnoreCase 的区别
+
+
+
+# 6/7
+
+
+
+需要说明的是 Spring Boot 2.0 已经不再支持使用继承WebMvcConfigurerAdapter 来实现MVC 配置了
+
+使用了thymeleaf所以，使用mvc的自然是无用的，必须要修改为thymeleaf才行
+
+
+
+# 6/11
+
+@Validated的使用方法 和 @valid的区别
