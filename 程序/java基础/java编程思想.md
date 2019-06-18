@@ -559,11 +559,108 @@ public class ArrayMaker<T> {
 }
 ```
 
+## 15.9 边界
+
+边界可以在泛型的参数类型上设置限制条件，可以强制规定泛型可以应用的类型，潜在的效果是按照边界类型来调用方法。
+
+因为擦除移除了类型信息，所以无界泛型参数调用的方法只是那些可以用Object调用的方法。Java泛型重用了extends关键字来实现将参数限制为某个类型自己。
+
+==extends关键字在泛型边界上下文环境中和在普通情况下所具有的的意义是完全不同的。==
+
+```java
+interface HasColor{
+    java.awt.Color getColor();
+}
+class Colored<T extends HasColor>{
+    T item;
+    Colored(T item){ this.item = item; }
+    java.awt.Color color(){
+        return item.getColor();
+    }
+}
+class Dimension{ public int x, y, z; }
+class ColoredDimension<T extends HasColor & Dimension>{
+    T item;
+    ColoredDimension(T item){ this.item = item; }
+    T getItem(){ return item; }
+    java.awt.Color color(){ return item.getColor(); }
+    int getX(){ return item.x; }
+    int getY(){ return item.y; }
+    int getZ(){ return item.z; }
+}
+```
+
+可以使用继承来消除冗余
+
+```java
+class HoldItem<T>{
+    T item;
+    HoldItem(T item){ this.item = item; }
+    T getItem(){ return item; }
+}
+
+class Colored2<T extends HasColor> extends HoldItem<T>{
+    Colored2(T item){ super(item); }
+    java.awt.Color color(){ return item.getColor(); }
+}
+
+class ColoredDimension2<T extends Dimension & HasColor> extends Colored2<T>{
+    ColoredDimension2<T>{ super(item); }
+    int getX(){ return item.x; }
+    int getY(){ return item.y; }
+    int getZ(){ return item.z; }
+}
+```
+
+## 15.10 通配符
+
+Apple的List在类型上不等价于Fruit的List，即使Apple是一种Fruit类型。
+
+```java
+class Fruit{}
+class Apple extends Fruit {}
+class Jonathan extends Apple {}
+class Orange extends Fruit{}
+
+public class NonCovariantGenerics{
+    //Compile Error: incompatible types;
+    List<Fruit> flist = new ArrayList<Apple>();
+}
+```
 
 
 
+泛型没有内建的协变类型。数组在语言中是完全定义的，因此可以内建了编译期和运行时的检查，但是使用泛型时，编译器和运行时系统都不知道你想用类型做些什么，以及应该采用什么样的规则。
 
+解释：
 
+1. 两个泛型之间是没有关系的（所以自然没有继承关系）
+2. List<Apple>在类型上不等价于List<Number>
+3. 真正的问题是，讨论的是容器的类型，而不是容器持有的类型
+
+### 延伸--Java泛型的协变、逆变和不变
+
+协变：<? extends T> --->实现向上转型List<? extends Fruit> flist = new ArrayList<Apple>();    说明实际类型比变量显示的更小
+
+逆变：<? super T>--->实现向下转型List<? super Apple> alist = new ArrayList<Fruit>();  说明实际类型比变量显示的更大
+
+不变：T  --->没有关系，无法去比较
+
+**逆变与协变来描述类型转换（type transformation）后的继承关系**，其定义：如果A、B表示类型，f(·)表示类型转化
+
+f(·)是**逆变（contravariant）**的，当A≤B时有f(B)≤f(A)成立；
+
+f(·)是**协变（covariant）**的，当A≤B时有f(A)≤f(B)成立；
+
+f(·)是**不变（invariant）**的，当A≤B时上述两个式子均不成立，即f(A)与f(B)相互之间没有继承关系
+
+## 15.10.1 
+
+List<? extends Fruit> 的add()方法参数就变成了"? extends Fruit"，从这个描述中，编译器不能了解这里需要Fruit的那个具体子类型，因此他不会接受任何类型的Fruit。
+
+将Apple向上转型为Fruit也没用，==编译器会直接拒绝调对参数列表中涉及通配符的方法的调用==
+
+**为什么数组 中因为继承的缘故，不知道具体的实现类，但是只要是子类就满足，这里就是不知道什么实现类，我就一个都允许**
 
 # 16.数组
 

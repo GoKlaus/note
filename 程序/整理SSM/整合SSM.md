@@ -195,3 +195,235 @@ c、加载Servlet：初始化DispatcherServlet，在SpringMVC架构中，Dispatc
 
 
 使用了thymeleaf所以，使用mvc的自然是无用的，必须要修改为thymeleaf才行
+
+
+
+
+
+
+
+
+
+# IOC
+
+Spring容器来实现对象的创建、协调工作
+
+
+
+# AOP
+
+AOP(Aspect Oriented Programming)面向切面编程，OOP(Object Oriented Programming)的补充和完善。
+
+## 核心概念
+
+1、横切关注点
+
+2、切面（aspect）
+
+3、连接点（joinpoint）
+
+4、切入点（pointcut）
+
+5、通知（advice）
+
+6、目标对象
+
+7、织入（weave）
+
+8、引入（introduction）
+
+
+
+在代码使用遇到的问题
+
+定义注解类
+
+```java
+/*
+* 写这个注解类是用来记录一些借口操作的日志
+* 所以切入点是在接口方法入口处使用注解
+*/
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Log {
+    String value() default "";
+}
+```
+
+
+
+这个类是对文章进行操作的
+
+```java
+/**
+ * description:
+ * author:zhaoxingbao
+ * date:2019/6/10
+ * co:
+ */
+@RestController
+@RequestMapping("/article")
+@Slf4j
+public class ArticleController extends BaseController {
+
+    @Autowired
+    private ArticleService articleService;
+
+    /**
+     *
+     * @return
+     */
+    @RequestMapping("/save")
+    @Log("新增文章")
+    public String save(@Validated @RequestBody Article article){
+        try {
+            articleService.save(article);
+            return JsonUtil.getSucc(Constant.SUC);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            throw new GlobalException(e.getMessage());
+        }
+    }
+
+    @RequestMapping("/delete")
+    @Log("删除文章")
+    public String delete(@RequestBody List<Long> ids){
+        try {
+            if(null == ids || ids.size() == 0){
+                return JsonUtil.getErrorJson(Constant.PARAM_ERROR);
+            }
+            articleService.softDelete(ids);
+            return JsonUtil.getSucc(Constant.SUC);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info(e.getMessage());
+            throw new GlobalException(e.getMessage());
+        }
+    }
+}
+```
+
+
+
+切面编程
+
+```java
+@Aspect
+@Component
+public class LogAspect {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private LogService logService;
+
+    /**
+     * @description
+     * @author zhaoxingbao
+     * @date 2019/6/4 9:25
+     * @param
+     * @return
+     */
+    @Pointcut("@annotation(com.opco.blog.admin.annotation.Log)")
+    public void pointcut(){
+
+    }
+
+    @Around("pointcut()")
+    public Object around(ProceedingJoinPoint proceedingJoinPoint) throws JsonProcessingException {
+        Object result = null;
+        long beginTime = System.currentTimeMillis();
+        try {
+            result = proceedingJoinPoint.proceed();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            throw new GlobalException(throwable.getMessage());
+        }
+        //获取request请求
+        HttpServletRequest request = HttpContextUtil.getHttpServletRequest();
+        //设置ip地址
+        String ip  = IPUtil.getIPAddr(request);
+        //记录时间
+        long time = System.currentTimeMillis() - beginTime;
+        //保存日志
+        User user = (User) SecurityUtils.getSubject().getPrincipal();
+        SysLog sysLog = new SysLog();
+        sysLog.setUsername(user.getUsername());
+        sysLog.setIp(ip);
+        sysLog.setTime(time);
+        logService.saveLog(proceedingJoinPoint,sysLog);
+        return result;
+    }
+
+}
+```
+
+## 注解说明
+
+1、@Aspect
+
+作用是把当前类表示为一个切面供容器读取
+
+2、@Before
+
+标识一个前置增强方法，相当于BeforeAdvice的功能
+
+3、@AfterReturning
+
+后置增强，相当于AfterReturningAdvice，方法正常退出时执行
+
+4、@AfterThrowing
+
+异常抛出增强，相当于ThrowAdvice
+
+5、@After
+
+final增强，不管是抛出异常或者正常退出都会执行
+
+6、@Around
+
+环绕增强，相当于MethodInterceptor
+
+7、@DeclareParents
+
+引介增强，相当于IntroductionInterceptor
+
+### 命名及匿名切入点
+
+命名切入点可以被其他切入点引用，而匿名切入点是不可以的。只有@AspectJ支持命名切入点，而Schema风格不支持命名切入点。
+
+![img](assets/659572-20160630115431452-1286976858.png)
+
+## AspectJ组合切入点表达式
+
+AspectJ使用 且（&&）、或（||）、非（！）来组合切入点表达式 
+
+ 在Schema风格下，由于在XML中使用“&&”需要使用转义字符`“&amp;&amp;”`来代替之，所以很不方便，因此Spring ASP 提供了and、or、not来代替&&、||、！。
+
+切入点使用示例
+
+a、execution：使用”execution(方法表达式)“匹配方法执行；
+
+b、within：使用“within(类型表达式)”匹配指定类型内的方法执行
+
+c、this：使用“this(类型全限定名)”匹配当前AOP代理对象类型的执行方法；注意是AOP代理对象的类型匹配，这样就可能包括引入接口方法也可以匹配，注意this中使用的表达式是类型全限定名，不支持通配符
+
+d、target：使用“target(类型全限定名)”匹配当前目标对象类型的执行方法；注意是目标对象的类型匹配，这样就不包括引入接口也类型匹配；注意target中使用的表达式必须是类型全限定名，不支持通配符；
+
+e、args：使用“args(类型参数列表)”匹配当前执行的方法传入参数为指定类型的执行方法；注意是匹配传入的参数类型，不是匹配方法签名的参数类型；参数类型列表中的参数必须是类型全限定名，通配符不支持 ；args属于动态切入点，这种切入点的开销非常大，非特殊情况最好不要用；
+
+f、@within：使用“@within(注解类型)”匹配所有持有指定注解类型内的方法；注解类型也必须是全限定类型名
+
+g、@target：使用“@target(注解类型)”匹配当前目标对象类型的执行方法，其中目标对象持有指定的注解；注解类型也必须是全限定类型名
+
+h、@args：使用“@args(注解列表)“匹配当前执行的方法传入的参数持有指定注解的执行；注解类型也必须是全限定类型名；
+
+i、@annotation：使用“@annotation(注解类型)”匹配当前执行方法持有指定注解的方法；注解类型也必须是全限定类型名；
+
+j、bean：使用“bean(Bean id 或名字通配符)”匹配特定名称的Bean对象的执行方法；Spring ASP扩展的，在AspectJ中无相应概念；
+
+k、reference  pointcut：表示引用其他命名切入点，只有@AspectJ风格支持，Schema风格不支持
+
+参考：
+
+[一个很不错的AspectJ的Execution表达式说明](<https://blog.csdn.net/xiao190128/article/details/82181769>)
