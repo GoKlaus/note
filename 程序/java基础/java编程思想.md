@@ -656,6 +656,16 @@ public class NonCovariantGenerics{
 
 不变：T  --->没有关系，无法去比较
 
+```
+T   和   ？ 区别
+声明一个泛型类或泛型方法
+使用一个泛型类或泛型方法
+```
+
+
+
+ 
+
 **逆变与协变来描述类型转换（type transformation）后的继承关系**，其定义：如果A、B表示类型，f(·)表示类型转化
 
 f(·)是**逆变（contravariant）**的，当A≤B时有f(B)≤f(A)成立；
@@ -670,17 +680,80 @@ List<? extends Fruit> 的add()方法参数就变成了"? extends Fruit"，从这
 
 将Apple向上转型为Fruit也没用，==编译器会直接拒绝调对参数列表中涉及通配符的方法的调用==
 
-**为什么数组 中因为继承的缘故，不知道具体的实现类，但是只要是子类就满足，这里就是不知道什么实现类，我就一个都允许**
 
-## 15.10.4 捕获转换
+
+```
+List和List<?>
+List表示   持有任何Object类型的原生List
+List<?>表示  具有某种特定类型的非原生List，只是不知道那种类型是什么
+```
+
+
+
+
+
+### 15.10.2 逆变
+
+超类型通配符，声明通配符继承某个类
+
+### 15.10.4 捕获转换
 
 通配符`?`和任意引用类型`T`的关系，对于ArrayList<?>类型是ArrayList<T>的超类型。
 
 
 
+## 15.11 问题
+
+ 基本类型不能作为类型参数，
+
+解决方案是
+
+> Java SE5的自动包装机制，双向转换机制，ArrayList<Integer> 就像是一个ArrayList<int>一样
 
 
 
+## 15.12 自限定的类型
+
+```java
+class SelfBounded<T extends SelfBounded<T>>
+```
+
+
+
+古怪的循环泛型（CRG）
+
+CRG：**基类用导出类替代其参数。**意味着泛型基类编程了一种其所有导出类的公共功能的模板。
+
+```java
+//这个不是   
+public interface BaseService<T>{
+    void f();
+}
+
+
+public class BaseServiceImpl<T> implements BaseService<T> {
+    
+    private Mapper<T> mapper;
+    
+    void f(){
+        
+    }
+}
+
+public interface FruitMapper<Fruit> extends Mapper<Fruit>{
+    
+}
+
+public interface FruitService extends FruitService<Fruit>{}
+
+public class FruitServiceImpl implements FruitServiceImpl{}
+```
+
+
+
+
+
+### 自限定
 
 
 
