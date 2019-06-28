@@ -774,9 +774,35 @@ authorizer.rolePermissionResolver=$rolePermissionResolver
 
 # 3 ini配置
 
-之前章节我们已经接触过一些INI配置规则了，如果大家使用过如Spring之类的IoC/DI容器的话，Shiro提供的INI配置也是非常类似的，即可以理解为是一个IoC/DI容器，但是区别在于它从一个根对象securityManager开始。
-
  
 
+# 5 编码/加密
 
+shiro本身提供base64和16进制字符串编码/解码的API支持
 
+```java
+String str = "hello";
+String base64Encoded = Hex.encodeToString(str.getBytes());
+String str2 = new String(Hex.decode(base64Encoded.getBytes()));
+Assert.assertEquals(str, str2);
+```
+
+## 散列算法
+
+散列算法：一种不可逆的算法
+
+常见散列算法MD5、SHA。
+
+散列算法使用salt（盐）的作用：破解增加难度。直接用来加密md5解密网站，可以反解密
+
+## 加密/解密
+
+提供对称式加密/解密算法的支持
+
+## DefaultPasswordService配合PasswordMatcher
+
+DefaultPasswordService配合PasswordMatcher实现简单的密码加密与验证服务
+
+PasswordService用来加密密码
+
+PasswordMatcher用来验证凭据是否匹配，不匹配将抛出IncorrectCredentialsException异常
