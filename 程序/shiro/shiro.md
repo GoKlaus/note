@@ -806,3 +806,14 @@ DefaultPasswordService配合PasswordMatcher实现简单的密码加密与验证�
 PasswordService用来加密密码
 
 PasswordMatcher用来验证凭据是否匹配，不匹配将抛出IncorrectCredentialsException异常
+
+
+
+# 缓存
+
+
+
+# 持久化
+
+
+
