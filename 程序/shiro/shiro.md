@@ -81,19 +81,21 @@ Shiro可以非常容易的开发出足够好的应用，其不仅可以用在Jav
 
 ## 2.2 身份认证流程
 
-先明确几个概念：
+概念：
 
 **principles：**身份，主体的标识属性，可以是任何东西，如用户名、邮箱等，唯一即可。一个主体可以有多个principals，但只有一个Primary principals，一般是用户名/密码/手机号
 
-**credentials**：证明/凭证，即只有主体知道的安全值，如密码/数字证书等。最常见的principals和credentials组合就是用户名/密码了。接下来先进行一个基本的身份认证。
+**credentials**：证明/凭证，即只有主体知道的安全值，如密码/数字证书等。最常见的principals和credentials组合就是用户名/密码了。
 
-另外两个相关的概念是之前提到的**Subject**及**Realm**，分别是主体及验证主体的数据源。
+
+
+**Subject**及**Realm**，分别是主体及验证主体的数据源。
 
 ![img](assets/8d639160-cd3e-3b9c-8dd6-c7f9221827a5.png)
 
 ### 2.2.1  Realm
 
-Realm：域，Shiro从从Realm获取安全数据（如用户、角色、权限），就是说SecurityManager要验证用户身份，那么它需要从Realm获取相应的用户进行比较以确定用户身份是否合法；也需要从Realm得到用户相应的角色/权限进行验证用户是否能进行操作；可以把Realm看成DataSource，即安全数据源。如我们之前的ini配置方式将使用org.apache.shiro.realm.text.IniRealm。
+Realm：域，Shiro从Realm获取安全数据（如用户、角色、权限），就是说SecurityManager要验证用户身份，那么它需要从Realm获取相应的用户进行比较以确定用户身份是否合法；也需要从Realm得到用户相应的角色/权限进行验证用户是否能进行操作；可以把Realm看成DataSource，即安全数据源。
 
 ####  Shiro默认提供的Realm
 
@@ -208,19 +210,18 @@ securityManager.realms=$jdbcRealm
 Authenticator的职责是验证用户帐号，是Shiro API中身份验证核心的入口点： 
 
 ```java
-public AuthenticationInfo authenticate(AuthenticationToken authenticationToken)  
-            throws AuthenticationException;   
+public AuthenticationInfo authenticate(AuthenticationToken authenticationToken)  throws AuthenticationException;   
 ```
 
 如果验证成功，将返回AuthenticationInfo验证信息，==此信息中包含了身份及凭证==；如果验证失败将抛出相应的AuthenticationException实现。
 
 SecurityManager接口继承了Authenticator，另外还有一个ModularRealmAuthenticator实现，其委托给多个Realm验证，==验证规则通过AuthenticationStrategy接口指定，默认提供的实现==：
 
-**FirstSuccessfulStrategy**：只要有一个Realm验证成功即可，只返回第一个Realm身份验证成功的认证信息，其他的忽略；
+==FirstSuccessfulStrategy==：只要有一个Realm验证成功即可，只返回第一个Realm身份验证成功的认证信息，其他的忽略；
 
-**AtLeastOneSuccessfulStrategy**：只要有一个Realm验证成功即可，和FirstSuccessfulStrategy不同，返回所有Realm身份验证成功的认证信息；
+==AtLeastOneSuccessfulStrategy==：只要有一个Realm验证成功即可，和FirstSuccessfulStrategy不同，返回所有Realm身份验证成功的认证信息；
 
-**AllSuccessfulStrategy**：所有Realm验证成功才算成功，且返回所有Realm身份验证成功的认证信息，如果有一个失败就失败了。
+==AllSuccessfulStrategy==：所有Realm验证成功才算成功，且返回所有Realm身份验证成功的认证信息，如果有一个失败就失败了。
 
 ==ModularRealmAuthenticator默认使用AtLeastOneSuccessfulStrategy策略。==
 
@@ -811,9 +812,99 @@ PasswordMatcher用来验证凭据是否匹配，不匹配将抛出IncorrectCrede
 
 # 缓存
 
+```java
+package com.opco.blog.admin.config.shiro;
+
+import org.apache.shiro.cache.Cache;
+import org.apache.shiro.cache.CacheException;
+import org.apache.shiro.cache.CacheManager;
+import org.springframework.data.redis.core.RedisTemplate;
+
+import javax.annotation.Resource;
+
+/**
+ * description:
+ * author:zhaoxingbao
+ * date:2019/7/16
+ * co:
+ */
+public class RedisCacheManager implements CacheManager {
+
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @Override
+    public <K, V> Cache<K, V> getCache(String name) throws CacheException {
+        return null;
+    }
+}
+```
+
+用的过程中遇到
+
+## @Resource注解，参考
+
+[][1]
+
+[@Resource和@Autowired和@Qualifier的异同][1]
+
+@Resource是按照名称来装配注入的，只有找不到与名称匹配的Bean才会按照类型
+
+@Autowired默认是按照类型注入，可以和@Qualifier注解使用
+
+@Resource是由J2EE提供的，@Autowired是由Spring提供的，减少系统对Spring的依赖建议使用@Resource注解
+
+@Resource和@Autowired都可以书写标注在字段或者该字段的setter方法上
+
 
 
 # 持久化
 
+自定义DBSessionDAO用来持久化Session，Session对象也是自定义的用来保存关键的信息，或者定制信息
 
+```java
+//继承
+public class DBSessionDao extends EnterpriseCacheSessionDAO {
+    //override four method
+    @Override
+    protected Serializable doCreate(Session session) {
+        return super.doCreate(session);
+    }
+    
+    @Override
+    protected Session doReadSession(Serializable sessionId) {
+        return super.doReadSession(sessionId);
+    }
+
+    @Override
+    protected void doUpdate(Session session) {
+        super.doUpdate(session);
+    }
+
+    @Override
+    protected void doDelete(Session session) {
+        super.doDelete(session);
+    }
+}
+```
+
+ValidatingSession
+
+
+
+
+
+
+
+# Session管理器
+
+
+
+
+
+
+
+
+
+[1]: https://blog.csdn.net/Baple/article/details/17891755	"Spring @Resource、@Autowired、@Qualifier的注解注入及区别"
 

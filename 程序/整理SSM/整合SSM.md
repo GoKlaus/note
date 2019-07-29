@@ -427,3 +427,77 @@ k、reference  pointcut：表示引用其他命名切入点，只有@AspectJ风�
 参考：
 
 [一个很不错的AspectJ的Execution表达式说明](<https://blog.csdn.net/xiao190128/article/details/82181769>)
+
+
+
+
+
+# @Autowired和@Resource注解的区别
+
+都能用来标注在字段或属性上
+
+
+
+不同在于：
+
+1. 提供方：@Autowired是由org.springframework.beans.factory.annotation.Autowired提供，换句话说就是由Spring提供      @Resource是 javax.annotation.Resource提供，即J2EE提供，需要JDK1.6及以上
+
+2. 注入方式：@Autowired只按照byType 注入；@Resource默认按byName自动注入，也提供按照byType 注入；
+
+3. 属性：@Autowired按类型装配依赖对象，默认情况下它要求依赖对象必须存在，如果允许null值，可以设置它required属性为false。如果想使用按名称装配，可以结合@Qualifier注解一起使用。@Resource有两个中重要的属性：name和type。name属性指定byName，如果没有指定name属性，当注解标注在字段上，即默认取字段的名称作为bean名称寻找依赖对象，当注解标注在属性的setter方法上，即默认取属性名作为bean名称寻找依赖对象。需要注意的是，@Resource如果没有指定name属性，并且按照默认的名称仍然找不到依赖对象时， @Resource注解会回退到按类型装配。但一旦指定了name属性，就只能按名称装配了。
+
+4. @Resource装配顺序
+
+   　　1. 如果同时指定了name和type，则从Spring上下文中找到唯一匹配的bean进行装配，找不到则抛出异常
+
+   　　2. 如果指定了name，则从上下文中查找名称（id）匹配的bean进行装配，找不到则抛出异常
+
+   　　3. 如果指定了type，则从上下文中找到类型匹配的唯一bean进行装配，找不到或者找到多个，都会抛出异常
+
+   　　4. 如果既没有指定name，又没有指定type，则自动按照byName方式进行装配；如果没有匹配，则回退为一个原始类型进行匹配，如果匹配则自动装配；      
+
+
+
+推荐使用@Resource注解在字段上，这样就不用写setter方法了.并且这个注解是属于J2EE的，减少了与Spring的耦合,这样代码看起就比较优雅 
+
+
+
+# @Configuration和@Component区别
+
+> 一句话就是 `@Configuration` 中所有带 `@Bean` 注解的方法都会被动态代理，因此调用该方法返回的都是同一个实例
+
+## `@Configuration`注解
+
+```java
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Component
+public @interface Configuration {
+    String value() default "";
+}
+```
+
+本质上还是 `@Component`，因此 `<context:component-scan/>` 或者 `@ComponentScan` 都能处理`@Configuration` 注解的类
+
+@Configuration 标记的类必须符合下面的要求：
+
+- 配置类必须以类的形式提供（不能是工厂方法返回的实例），允许通过生成子类在运行时增强（cglib 动态代理）。
+- 配置类不能是 final 类（没法动态代理）。
+- 配置注解通常为了通过 @Bean 注解生成 Spring 容器管理的类，
+- 配置类必须是非本地的（即不能在方法中声明，不能是 private）。
+  任何嵌套配置类都必须声明为static。
+- @Bean 方法可能不会反过来创建进一步的配置类（也就是返回的 bean 如果带有 @Configuration，也不会被特殊处理，只会作为普通的 bean）。
+
+## 加载过程
+
+==~~~这里也不太懂==
+
+PostProcessor？？？
+
+postProcessBeanFactory？？？
+
+Spring 容器在启动时，会加载默认的一些 PostPRocessor，其中就有 ConfigurationClassPostProcessor，这个后置处理程序专门处理带有 @Configuration 注解的类，这个程序会在 bean 定义加载完成后，在 bean 初始化前进行处理。主要处理的过程就是使用 cglib 动态代理增强类，而且是对其中带有 @Bean 注解的方法进行处理。
+
+在 ConfigurationClassPostProcessor 中的 postProcessBeanFactory 方法中调用了下面的方法：
+
