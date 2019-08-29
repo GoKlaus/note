@@ -980,7 +980,7 @@ Arrays.equals()，针对所有基本类型与Object都做了重载
 
 # 17.容器深入研究
 
-```
+```java
 Object.toString方法产生该对象的散列码的无符号十六进制表示（通过hashCode()生成的
 ```
 
@@ -998,33 +998,39 @@ Object.toString方法产生该对象的散列码的无符号十六进制表示�
 
 ### 未获支持操作
 
-UnsupportedOperationException
+`UnsupportedOperationException`
 
 ## 17.5 List
 
+### LinkedList
+
+链表不支持快速的随机访问，如果需要查看链表中第n个元素，就必须从头开始，越过n-1个元素
+
 ## 17.6 Set和存储顺序
 
-| Set(interface) | 存入Set的每个元素都必须是唯一的，Set不保存重复元素，加入Set的元素必须定义equals()方法以确保对象的唯一性 |
-| -------------- | ------------------------------------------------------------ |
-| HashSet        | 为快速查找而设计的Set。存入HashSet的元素必须定义hashCode()   |
-| TreeSet        | 保持次序的Set，底层为树结构。使用它可以从Set中提取有序的序列。元素必须实现Comparable接口 |
-| LinkedHashSet  | 具有HashSet的查询速度，且内部使用链表维护元素的顺序(插入的次序)。迭代器遍历Set时，会按照元素插入的次序显示。元素必须定义hashCode()方法 |
+| Set(interface)  | 存入Set的每个元素都必须是唯一的，Set不保存重复元素，加入Set的元素必须定义equals()方法以确保对象的唯一性 |
+| --------------- | ------------------------------------------------------------ |
+| `HashSet`       | 为快速查找而设计的Set。存入`HashSet`的元素必须定义`hashCode()` |
+| `TreeSet`       | 保持次序的Set，底层为树结构。使用它可以从Set中提取有序的序列。元素必须实现Comparable接口 |
+| `LinkedHashSet` | 具有`HashSet`的查询速度，且内部使用链表维护元素的顺序(插入的次序)。迭代器遍历Set时，会按照元素插入的次序显示。元素必须定义`hashCode()`方法 |
 
-HashSet对速度进行了优化
+`HashSet`对速度进行了优化
 
-良好的编程风格而言，覆盖equals()时同事覆盖hashCode()方法
+良好的编程风格而言，覆盖equals()时同事覆盖`hashCode()`方法
 
-### SortedSet
+### `SortedSet`
 
-SortedSet的comparator()，返回当天Set使用的Comparator；或者返回null，表示自然排序
+`SortedSet`的`comparator()`，返回当天Set使用的`Comparator`；或者返回null，表示自然排序
 
-SortedSet实现排序的原理：
+`SortedSet`实现排序的原理：
 
 ```
 
 ```
 
 ## 17.7 队列
+
+> 队列通常有两种实现方式：一种是使用循环数组，另一种是使用链表
 
 ### 优先级队列
 
