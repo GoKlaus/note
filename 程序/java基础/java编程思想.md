@@ -2,6 +2,31 @@
 # 1.对象导论
 
 # 2.一切都是对象
+
+在Java中，只有`基本类型`不是对象
+
+### equals方法的准则
+
+前提：是同一个类
+
+建议不使用instanceof，无法解决otherObject是子类的情况，并且还有可能会招致一些麻烦
+
+```java
+if (!(otherObject   instanceof  Employee)) return false;
+```
+
+
+
+```
+自反性：对于任何非空引用值x，x.equals(x)都应返回true
+对称性：对于任何非空引用值x和y，当且仅当y.equals(x)返回true时，x.equals(y)才应返回true
+传递性：对于任何非空引用值x、y和z，如果x.equals(y)返回true，并且y.equals(z)返回true，那么x.equals(z)应返回true
+一致性：对于任何非空引用值x和y，多次调用x.equals(y)始终返回true或始终返回false，前提是对象上equals比较中所用的信息没有被修改
+非空性：对于任何非空引用值x，x.equals(null)都应返回false
+```
+
+## 
+
 # 3.操作符
 # 4.控制执行流程
 # 5.初始化与清理
@@ -52,16 +77,6 @@ Java容器类类库的用途是“保存对象”，并将其划分为两个不�
 判断某个元素是否属于 结合内，或者集合是否包含这个对象，需要这个类有重写equals和hashCode
 
 
-
-### equals方法的准则
-
-```
-自反性：对于任何非空引用值x，x.equals(x)都应返回true
-对称性：对于任何非空引用值x和y，当且仅当y.equals(x)返回true时，x.equals(y)才应返回true
-传递性：对于任何非空引用值x、y和z，如果x.equals(y)返回true，并且y.equals(z)返回true，那么x.equals(z)应返回true
-一致性：对于任何非空引用值x和y，多次调用x.equals(y)始终返回true或始终返回false，前提是对象上equals比较中所用的信息没有被修改
-非空性：对于任何非空引用值x，x.equals(null)都应返回false
-```
 
 ## 11.6 迭代器
 
