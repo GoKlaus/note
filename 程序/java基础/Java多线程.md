@@ -121,5 +121,25 @@ sychronized方法是对当前对象进行加锁，synchronized代码块是对某
   --当持有”对象监视器“为同一个对象的前提下，同一时间只有一个线程可以执行synchronized（非this对象x）同步代码块中的代码
   ```
 
-  
+
+
+
+"synchronized（非this对象x）"格式的写法是将x对象本身作为“对象监视器”，可以得到以下3个结论：
+
+```java
+--当多个线程同步执行synchronized() {}同步代码块时呈同步效果
+--当其他线程执行x对象中synchronized同步方法时呈同步效果
+--当其他线程执行x对象里面的synchronized(this)代码块是也是呈现同步效果
+```
+
+
+
+
+
+### 静态同步synchronized方法与synchronized(class)代码块
+
+```java
+--synchronized 关键字加到static静态方法上是给class类上锁，非静态方法上是给对象加锁
+--synchronized(this)和 synchronized static 方法作用一样
+```
 
