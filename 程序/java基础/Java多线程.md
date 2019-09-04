@@ -128,8 +128,6 @@ sychronized方法是对当前对象进行加锁，synchronized代码块是对某
 
 
 
-
-
 "synchronized（非this对象x）"格式的写法是将x对象本身作为“对象监视器”，可以得到以下3个结论：
 
 ```java
@@ -146,7 +144,7 @@ sychronized方法是对当前对象进行加锁，synchronized代码块是对某
 
 ```java
 --synchronized 关键字加到static静态方法上是给class类上锁，非静态方法上是给对象加锁
---synchronized(this)和 synchronized static 方法作用一样
+--synchronized(this)和 synchronized static 一个是对象锁，一个是class锁，class锁对类的所有对象实例起作用  
 ```
 
 
@@ -162,3 +160,26 @@ JDK自带工具可以检测是否有死锁现象。 jdk/bin/jps  命令    jdk/b
 
 
 ### 内置类与静态内置类
+
+
+
+### 锁对象的改变
+
+多个线程同时持有锁对象，这些线程之间就是同步的，分别获得各自的锁对象，那么之间就是异步的
+
+
+
+只要对象不变，即使对象的属性被修改，运行的结果还是同步的。
+
+
+
+## volatile关键字
+
+volatile关键字的主要作用是使变量在多个线程间可见
+
+
+
+关键字volatile的作用是强制从公共堆栈中取得变量的值，而不是从线程私有数据栈中取得变量的值
+
+
+
