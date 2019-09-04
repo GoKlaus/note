@@ -123,6 +123,12 @@ sychronized方法是对当前对象进行加锁，synchronized代码块是对某
 
 
 
+不是使用String作为对象监视器，因为jre常量池的原因
+
+
+
+
+
 
 "synchronized（非this对象x）"格式的写法是将x对象本身作为“对象监视器”，可以得到以下3个结论：
 
@@ -143,3 +149,16 @@ sychronized方法是对当前对象进行加锁，synchronized代码块是对某
 --synchronized(this)和 synchronized static 方法作用一样
 ```
 
+
+
+### 多线程的死锁
+
+不同线程等待根本不可能被释放的锁，从而导致所有的任务无法继续完成
+
+JDK自带工具可以检测是否有死锁现象。 jdk/bin/jps  命令    jdk/bin/jstack
+
+避免双方互相持有对方的锁的情况
+
+
+
+### 内置类与静态内置类
