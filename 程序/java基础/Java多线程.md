@@ -195,3 +195,30 @@ volatile关键字和synchronized关键字：
 ### volatile非原子的特性
 
 volatile  增加了实例变量在多个线程之间的可见性，不具备同步性
+
+volatile关键字解决的是变量读取时的可见性问题，但无法保证原子性，对于多个线程访问同一个实例变量还是需要加锁同步
+
+
+
+### 使用原子类操作
+
+原子操作是不能分割的整体，没有其他线程能够中断或检查正在原子操作中的变量，在没有锁的情况下可以做到线程安全
+
+
+
+### 原子类也并不完全安全
+
+原子类提供原子的操作，但是方法和方法之间的调用却不是原子的
+
+```java
+//只有这个一个是原子的
+aiRef.addAndGet(100);
+System.out.println(Thread.currentThread.getName())
+aiRef.addAndGet(1);
+```
+
+
+
+### synchronized代码块具有volatile同步的功能
+
+关键字syhchronized可以使多个线程访问同一个资源具有同步性，而且具有将线程工作内存中的私有变量与公共内存中的变量同步的功能
