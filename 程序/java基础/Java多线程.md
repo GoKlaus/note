@@ -181,5 +181,17 @@ volatile关键字的主要作用是使变量在多个线程间可见
 
 关键字volatile的作用是强制从公共堆栈中取得变量的值，而不是从线程私有数据栈中取得变量的值
 
+volatile关键字和synchronized关键字：
+
+```java
+---关键字 volatile 是线程同步的轻量级实现，所以volatile性能肯定比synchronized要好，并且volatile只能修饰变量， synchronized 可以修饰方法、代码块。
+---多线程访问 volatile 不会发生阻塞，而 synchronized 会出现阻塞
+---volatile 保证数据的可见性，但不能保证原子性 ; 而 synchronized 可以保证原子性，也可以间接保证可见性，因为它会将似有内存和公共内存中的数据做同步
+--- 关键字 volatile 解决的是变量在多个变量之间的可见性;而 synchronized 保证的是多个线程之间访问资源的同步性
+```
 
 
+
+### volatile非原子的特性
+
+volatile  增加了实例变量在多个线程之间的可见性，不具备同步性
