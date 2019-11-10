@@ -123,7 +123,7 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 
 在用到hash进行管理的数据结构中，就对速度比较重视，对抗碰撞不太看中，只要保证hash均匀分布就可以。比如hashmap，hash值（key）存在的目的是加速键值对的查找，key的作用是为了将元素适当地放在各个桶里，对于抗碰撞的要求没有那么高。换句话说，hash出来的key，只要保证value大致均匀的放在不同的桶里就可以了。但整个算法的set性能，直接与hash值产生的速度有关，所以这时候的hash值的产生速度就尤为重要，以JDK中的String.hashCode()方法为例：
 
- ![img](Hash_table.png) 
+ ![img](assert/Hash_table.png) 
 
 
 
