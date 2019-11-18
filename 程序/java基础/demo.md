@@ -598,3 +598,153 @@ public void jacksonCopy() throws IOException {
 | Gson序列化                | 1. 可用性强，新增成员变量不需要修改拷贝方法 2. 对拷贝类没有要求，不需要实现额外接口和方法 | 1. 底层实现复杂 2. 需要引入Gson第三方JAR包 3. 序列化与反序列化存在一定的系统开销 |
 | Jackson序列化             | 1. 可用性强，新增成员变量不需要修改拷贝方法                  | 1. 底层实现复杂 2. 需要引入Jackson第三方JAR包 3. 拷贝类（包括其成员变量）需要实现默认的无参构造函数 4. 序列化与反序列化存在一定的系统开销 |
 
+
+
+## 为什么阿里巴巴禁用Executors创建线程池
+
+### 线程池的定义
+
+管理一组工作线程。通过线程池复用线程有如下几点有点
+
+- 减少资源创建 => 减少内存开销，创建线程占用内存
+- 降低系统开销 => 创建线程需要时间，会延迟处理的请求
+- 提高系统稳定性 => 避免无限创建线程引起的OutOfMemoryError【简称OOM】
+
+
+
+简介TheadPoolExecutor，构造函数有4个，最终调用都是：
+
+```java
+public ThreadPoolExecutor(int corePoolSize,
+                          int maximumPoolSize,
+                          long keepAliveTime,
+                          TimeUnit unit,
+                          BlockingQueue<Runnable> workQueue,
+                          ThreadFactory threadFactory,
+                          RejectedExecutionHandler handler)
+```
+
+参数说明
+
+- corePoolSize => 线程池核心线程数量
+- maximumPoolSize => 线程池最大数量
+- keepAliveTime => 空闲线程存活时间
+- unit => 时间单位
+- workQueue => 线程池所使用的缓冲队列
+- threadFactory => 线程池创建线程使用的工厂
+- handler => 线程池对拒绝任务的处理策略
+
+
+
+==核心线程（corePool）==：线程池最终执行任务的角色肯定还是线程，同时我们也会限制线程的数量，所以我们可以这样理解核心线程，有新任务提交时，首先检查核心线程数，如果核心线程都在工作，而且数量也已经达到最大核心线程数，则不会继续新建核心线程，而会将任务放入等待队列。
+
+==等待队列 (workQueue)==：等待队列用于存储当核心线程都在忙时，继续新增的任务，核心线程在执行完当前任务后，也会去等待队列拉取任务继续执行，这个队列一般是一个线程安全的阻塞队列，它的容量也可以由开发者根据业务来定制。
+
+==非核心线程==：当等待队列满了，如果当前线程数没有超过最大线程数，则会新建线程执行任务，那么核心线程和非核心线程到底有什么区别呢？说出来你可能不信，本质上它们没有什么区别，创建出来的线程也根本没有标识去区分它们是核心还是非核心的，线程池只会去判断已有的线程数（包括核心和非核心）去跟核心线程数和最大线程数比较，来决定下一步的策略。
+
+==线程活动保持时间 (keepAliveTime)==：线程空闲下来之后，保持存活的持续时间，超过这个时间还没有任务执行，该工作线程结束。
+
+==饱和策略 (RejectedExecutionHandler)==：当等待队列已满，线程数也达到最大线程数时，线程池会根据饱和策略来执行后续操作，默认的策略是抛弃要加入的任务。
+
+
+
+作者：三好码农
+链接：https://juejin.im/post/5c8896be5188257ec828072f
+
+
+
+
+
+![](demo.assets/微信图片_20191118210932.jpg)
+
+
+
+### Executors创建线程池的方式
+
+- Executors.newCachedThreadPool()
+- Executors.newFixedThreadPool()
+- Executors.newSingleThreadExecutor()
+
+
+
+### Executors#newCachedThreadPool方法
+
+```java
+public static ExecutorService newCachedThreadPool() {
+    return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+                                  60L, TimeUnit.SECONDS,
+                                  new SynchronousQueue<Runnable>());
+}
+```
+
+CachedThreadPool是一个根据需要创建新线程的线程池
+
+
+
+- corePoolSize => 0，核心线程池的数量为0
+- maximumPoolSize => Integer.MAX_VALUE，可以认为最大线程数是无限的
+- keepAliveTime => 60L
+- unit => 秒
+- workQueue => SynchronousQueue
+
+
+
+当一个任务提交时，corePoolSize为0不创建核心线程，SynchronousQueue是一个不存储元素的队列，可以理解为队里永远是满的，因此最终会创建非核心线程来执行任务。对于非核心线程空闲60s时将被回收。**因为Integer.MAX_VALUE非常大，可以认为是可以无限创建线程的，在资源有限的情况下容易引起OOM异常**
+
+###  Executors#newSingleThreadExecutor方法 
+
+```java
+public static ExecutorService newSingleThreadExecutor() {
+        return new FinalizableDelegatedExecutorService
+            (new ThreadPoolExecutor(1, 1,
+                                    0L, TimeUnit.MILLISECONDS,
+                                    new LinkedBlockingQueue<Runnable>()));
+    }
+```
+
+SingleThreadExecutor是单线程线程池，只有一个核心线程
+
+
+
+- corePoolSize => 1，核心线程池的数量为1
+- maximumPoolSize => 1，只可以创建一个核心线程
+- keepAliveTime => 0L
+- unit => 毫秒
+- workQueue => LinkedBlockingQueue
+
+
+
+当一个任务提交时，首先会创建一个核心线程来执行任务，如果超过核心线程的数量，将会放入队列中，**因为LinkedBlockingQueue是长度为Integer.MAX_VALUE的队列，可以认为是无界队列，因此往队列中可以插入无限多的任务，在资源有限的时候容易引起OOM异常**，同时因为无界队列，maximumPoolSize和keepAliveTime参数将无效，压根就不会创建非核心线程
+
+###  Executors#newFixedThreadPool方法 
+
+```java
+public static ExecutorService newFixedThreadPool(int nThreads) {
+    return new ThreadPoolExecutor(nThreads, nThreads,
+                                  0L, TimeUnit.MILLISECONDS,
+                                  new LinkedBlockingQueue<Runnable>());
+}
+```
+
+FixedThreadPool是固定核心线程的线程池，固定核心线程数由用户传入
+
+
+
+- corePoolSize => n，核心线程池的数量为n
+- maximumPoolSize => n，线程池最大数量为n
+- keepAliveTime => 0L
+- unit => 毫秒
+- workQueue => LinkedBlockingQueue
+- 它和SingleThreadExecutor类似，唯一的区别就是核心线程数不同，并且由于使用的是LinkedBlockingQueue，在资源有限的时候容易引起OOM异常
+
+### 总结：
+
+
+
+FixedThreadPool和SingleThreadExecutor => 允许的请求队列长度为Integer.MAX_VALUE，可能会堆积大量的请求，从而引起OOM异常
+
+CachedThreadPool => 允许创建的线程数为Integer.MAX_VALUE，可能会创建大量的线程，从而引起OOM异常
+
+
+
+这就是为什么禁止使用Executors去创建线程池，而是推荐自己去创建ThreadPoolExecutor的原因
