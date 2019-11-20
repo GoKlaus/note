@@ -6,6 +6,8 @@
 
 可以使软件之间相互连接调用，通过分离数据的发送和接收，从而达到==异步处理==和==解耦==
 
+ RabbitMQ接收、存储、传递的是二进制流数据 
+
 通过消息机制，可以实现数据传输，非阻塞型操作，推送通知，发布/订阅，异步处理，work队列。
 
 `RabbitMQ`是消息中间件的一种。
@@ -100,7 +102,7 @@ RabbitMQ 是一个开源的 AMQP 实现，服务器端用Erlang语言编写，�
 
 通常我们谈到队列服务, 会有三个概念： 发消息者、队列、收消息者，RabbitMQ 在这个基本概念之上, 多做了一层抽象, 在发消息者和 队列之间, 加入了交换器 (Exchange). 这样发消息者和队列就没有直接联系, 转而变成发消息者把消息给交换器, 交换器根据调度策略再把消息再给队列。
 
-![](assets/RabbitMQ01.png)
+![](rabbitmq.assets/RabbitMQ01.png)
 
 - 左侧 P 代表 生产者，也就是往 RabbitMQ 发消息的程序。
 - 中间即是 RabbitMQ，*其中包括了 交换机 和 队列。*
@@ -122,18 +124,18 @@ RabbitMQ 是一个开源的 AMQP 实现，服务器端用Erlang语言编写，�
 - Headers：设置 header attribute 参数类型的交换机
 - Fanout：转发消息到所有绑定队列
 
-#### 类型
+## 类型
 
-##### **Direct Exchange**
+### Direct Exchange
 
 Direct Exchange 是 RabbitMQ 默认的交换机模式，也是最简单的模式，根据key全文匹配去寻找队列。
-![img](assets/rabbitMq_direct.png)
+![img](rabbitmq.assets/rabbitMq_direct.png)
 
 第一个 X - Q1 就有一个 binding key，名字为 orange； X - Q2 就有 2 个 binding key，名字为 black 和 green。*当消息中的 路由键 和 这个 binding key 对应上的时候，那么就知道了该消息去到哪一个队列中。*
 
 Ps：为什么 X 到 Q2 要有 black，green，2个 binding key呢，一个不就行了吗？ - 这个主要是因为可能又有 Q3，而Q3只接受 black 的信息，而Q2不仅接受black 的信息，还接受 green 的信息。
 
-##### **Topic Exchange**
+### Topic Exchange
 
 *Topic Exchange 转发消息主要是根据通配符。* 在这种交换机下，队列和交换机的绑定会定义一种路由模式，那么，通配符就要在这种路由模式和路由键之间匹配后交换机才能转发消息。
 
@@ -153,12 +155,12 @@ topic 和 direct 类似, 只是匹配上支持了"模式", 在"点分"的 routin
 - `*`表示一个词.
 - `#`表示零个或多个词.
 
-##### **Headers Exchange**
+### Headers Exchange
 
 headers 也是根据规则匹配, 相较于 direct 和 topic 固定地使用 routing_key , headers 则是一个自定义匹配规则的类型.
 在队列与交换器绑定时, 会设定一组键值对规则, 消息中也包括一组键值对( headers 属性), 当这些键值对有一对, 或全部匹配时, 消息被投送到对应队列.
 
-##### **Fanout Exchange**
+### Fanout Exchange
 
 Fanout Exchange 消息广播的模式，不管路由键或者是路由模式，*会把消息发给绑定给它的全部队列*，如果配置了 routing_key 会被忽略。
 
@@ -198,11 +200,63 @@ channel：消息通道，在客户端的每个连接里，可建立多个channel
 
 
 
+# 操作命令
+
+## win
+
+## 启动
+
+### 以应用的方式来启动
+
+```sh
+rabbitmq-server -detached
+#-detached 表示以后台方式启动
+#rabbitmq-server仅能够启动Broker。管理Broker需使用rabbitmqctl命令来执行。
+```
+
+### 以服务的方式来启动
+
+ 使用rabbitmq-service.bat命令将RabbitMQ安装为一个服务，如果修改了环境变量，需要重新安装。执行以下命令可以将RabbitMQ安装为一个服务 
+
+```
+rabbitmq-service install
+
+```
+
+ 执行完成后，一个以RABBITMQ_SERVICENAME命名的服务将会出现在Windows的服务面板中（开始->运行 services.msc），即可以使用Windows服务面板中提供的功能来管理服务，也可以使用rabbitmq-service命令来管理，如要启动服务，可执行： 
+
+```
+rabbitmq-service start
+```
+
+## 停止
+
+```
+
+```
+
+## UNIX
 
 
-# Java实现
 
-基于`java`的简单`demo`
+
+
+## 队列列表
+
+```
+sudo sudo rabbitmqctl list_queues
+rabbitmqctl.bat list_queues
+```
+
+
+
+
+
+# 
+
+# 简单demo
+
+## java
 
 ```xml
 <!--添加依赖-->
@@ -218,7 +272,7 @@ channel：消息通道，在客户端的每个连接里，可建立多个channel
 
 
 
-## Sending
+### Sending
 
 ![](rabbitmq.assets/sending-1574252401839.png)
 
@@ -262,6 +316,71 @@ public class Send {
     }
 }
 ```
+
+### Receiving
+
+```java
+package com.opco.rd.producer;
+
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+/**
+ * description:
+ * author:zhaoxingbao
+ * date:2019/11/20
+ * co:
+ */
+public class Receiver {
+    private final static String QUEUE_NAME = "hello";
+    public static void main(String[] args) throws IOException, TimeoutException {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("172.16.3.17");
+        factory.setPort(5672);
+        factory.setUsername("root");
+        factory.setPassword("Zywlw2018");
+        Connection connection = factory.newConnection();
+        Channel channel = connection.createChannel();
+        channel.queueDeclare(QUEUE_NAME, false, false, false, null);//声明消息队列，避免消费者先于生产者启动而无对应队列
+
+        System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+/*
+*	Note that we declare the queue here, as well. Because we might start the consumer before the publisher, we want to make sure the queue exists before we try to consume messages from it.
+
+Why don't we use a try-with-resource statement to automatically close the channel and the connection? By doing so we would simply make the program move on, close everything, and exit! This would be awkward because we want the process to stay alive while the consumer is listening asynchronously for messages to arrive -- 不采用try-catch 避免因为异常直接就全部退出了，保持消费者存活，监听消息的到来
+*/	
+         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+            String message = new String(delivery.getBody(), "UTF-8");
+            System.out.println(" [x] Received '" + message + "'");
+        };//消费回调
+        channel.basicConsume(QUEUE_NAME, true, deliverCallback, consumerTag -> { });//消费方法
+    }
+}
+
+
+```
+
+
+
+# Working Queues
+
+简单demo中使用命名的队列
+
+工作队列（Working Queues） 是为了使用多个work进程来处理分布式耗时任务 
+
+工作队列（Working Queues）的作用是避免阻塞等待资源密集类任务的完成，转而放入队列异步处理。 将任务封装成一个消息并将其发送至队列中，运行在后台的work进程就会从队列中取出任务并最终执行它。可以使用多个work进程来分摊任务 
+
+ ![img](rabbitmq.assets/python-two.png) 
+
+ 这个概念适合web项目，一次HTTP请求时间有限，对于复杂处理业务的请求，很难保证相应时间 
+
+## java
+
+
 
 
 
