@@ -1,14 +1,102 @@
 [TOC]
 
-# 1.简介
 
-RabbitMQ 是实现 AMQP（高级消息队列协议）的消息中间件的一种。 RabbitMQ 主要是为了实现系统之间的双向解耦而实现的。当**生产者大量产生数据时，消费者无法快速消费，那么需要一个中间层**。保存这个数据。
 
-AMQP，即 Advanced Message Queuing Protocol，高级消息队列协议，是应用层协议的一个开放标准，为面向消息的中间件设计。消息中间件主要用于组件之间的解耦，消息的发送者无需知道消息使用者的存在，反之亦然。AMQP 的主要特征是面向消息、队列、路由（包括点对点和发布/订阅）、可靠性、安全。
+### 消息机制：
+
+可以使软件之间相互连接调用，通过分离数据的发送和接收，从而达到==异步处理==和==解耦==
+
+通过消息机制，可以实现数据传输，非阻塞型操作，推送通知，发布/订阅，异步处理，work队列。
+
+`RabbitMQ`是消息中间件的一种。
+
+### 编写语言：
+
+Erlang
+
+# 主要特性：
+
+## 可靠性（Reliability）
+
+`RabbitMQ`使用一些机制来保证程序的可靠性，如持久化、传输确认机制、发布确认、高可用性
+
+## 灵活的路由机制（Flexible Routing）
+
+在消息进入队列之前，通过Exchange来路由消息的。对于典型的路由功能，`RabbitMQ`已经提供了一些内置的Exchange来实现。针对更复杂的路由功能，可以将多个Exchange绑定在一起，也通过插件机制实现自己的Exchange。
+
+## 消息集群（Clustering）
+
+多个`RabbitMQ`服务器可以组成一个集群，形成单个逻辑Broker。
+
+## Federation
+
+```
+For servers that need to be more loosely and unreliably connected than clustering allows, RabbitMQ offers a federation model.
+```
+
+
+
+## 队列高可用（Highly Available Queues）
+
+队列可以在集群中的机器上进行镜像，以确保在硬件问题下还保证消息安全。
+
+## 多种协议的支持（Multi-protocol）
+
+直接支持或者插件支持的方式，支持了几种消息协议
+
+### `AMQP`协议
+
+`RabbitMQ`最早开发就是为了支持`AMQP`，所以该协议是Broker支持的最核心的协议
+
+`AMQP` 0-9-1，0-9，0-8，和扩展协议
+
+### STOMP
+
+`RabbitMQ`通过插件机制支持STOMP当前所有版本
+
+### `MQTT`
+
+`MQTT`是一个轻量级的 发布/订阅 消息机制的二进制协议，旨在用于低端设备的客户端上。它很好的定义了 发布/订阅消息机制，不支持其它消息机制。
+
+`RabbitMQ`通过插件机制支持`MQTT 3.1`
+
+### `AMQP 1.0`
+
+不要在意这个名字，`AMQP` 1.0和`AMQP 0-9-1/0-9/0-8`在本质上是不同的，几乎什么都不一样。借助于`AMQP 1.0`非常少的语法要求；因此将现有的Broker添加上`AMQP 1.0`的协议支持是非常容易的。实质上这个协议比起`AMQP 0-9-1`，是非常复杂的，并且它有非常少的客户端实现。
+
+`RabbitMQ`通过插件机制支持`AMQP 1.0`
+
+### `HTTP`
+
+HTTP当然不是一个消息协议。`RabbitMQ`可以通过以下三种方式来传输消息：
+
+- 管理插件支持一个简单的`HTTP API`用于发送和接收消息。主要用于测试诊断的目的，但是针对少量的消息来说还是可靠的。
+- Web-STOMP插件使得，在浏览器上可使用基于`WebSockets`、或者`SockJS`来控制消息。
+- `JSON-RPC`插件使浏览器通过J`SON-RPC`和基于`AMQP 0-9-1`协议的消息进行通信。注意`JSON RPC`是一个同步的协议，基于异步传输的`AMQP`的一些功能将使用polling方式进行模拟。
+
+## 多语言客户端的支持（Many Clients）
+
+`RabbitMQ`几乎支持所有常用语言。
+
+## 管理界面（Management UI）
+
+`RabbitMQ`有一个易用的用户界面，使得用户可以监控和管理消息Broker的许多方面。
+
+## 跟踪机制（Tracing）
+
+如果消息异常，`RabbitMQ`提供消息跟踪机制，使用者可以找出发生了什么。
+
+## 插件机制（Plugin System）
+
+`RabbitMQ`提供了许多插件，来从多方面进行扩展，也可以编写自己的插件。
+
+
+
+`AMQP`，即 Advanced Message Queuing Protocol，高级消息队列协议，是应用层协议的一个开放标准，为面向消息的中间件设计。消息中间件主要用于组件之间的解耦，消息的发送者无需知道消息使用者的存在，反之亦然。AMQP 的主要特征是面向消息、队列、路由（包括点对点和发布/订阅）、可靠性、安全。
 
 RabbitMQ 是一个开源的 AMQP 实现，服务器端用Erlang语言编写，支持多种客户端，如：Python、Ruby、.NET、Java、JMS、C、PHP、ActionScript、XMPP、STOMP 等，支持 AJAX。用于在分布式系统中存储转发消息，在易用性、扩展性、高可用性等方面表现不俗。
 
-## 1.1 相关概念
+# 相关概念
 
 通常我们谈到队列服务, 会有三个概念： 发消息者、队列、收消息者，RabbitMQ 在这个基本概念之上, 多做了一层抽象, 在发消息者和 队列之间, 加入了交换器 (Exchange). 这样发消息者和队列就没有直接联系, 转而变成发消息者把消息给交换器, 交换器根据调度策略再把消息再给队列。
 
@@ -25,7 +113,7 @@ RabbitMQ 是一个开源的 AMQP 实现，服务器端用Erlang语言编写，�
   这里有一个比较重要的概念：**路由键** 。消息到交换机的时候，交互机会转发到对应的队列中，那么究竟转发到哪个队列，就要根据该路由键。
 - 绑定：也就是交换机需要和队列相绑定，这其中如上图所示，是多对多的关系。
 
-### 交换机(Exchange)
+## 交换机(Exchange)
 
 交换机的功能主要是接收消息并且转发到绑定的队列，交换机不存储消息，在启用ack模式后，交换机找不到队列会返回错误。交换机有四种类型：Direct, topic, Headers and Fanout
 
@@ -112,5 +200,74 @@ channel：消息通道，在客户端的每个连接里，可建立多个channel
 
 
 
-## 整合处理和java相关的
+# Java实现
+
+基于`java`的简单`demo`
+
+```xml
+<!--添加依赖-->
+<dependency>
+    <groupId>com.rabbitmq</groupId>
+    <artifactId>amqp-client</artifactId>
+    <version>5.7.2</version>
+</dependency>
+<!--这个jar包依赖，SLF4J和SLF4J Simple-->
+```
+
+![image-20191120201700127](rabbitmq.assets/image-20191120201700127.png)
+
+
+
+## Sending
+
+![](rabbitmq.assets/sending-1574252401839.png)
+
+publisher(sender)-->Send   发布/发送者
+
+consumer(receiver)-->Recv  消费/接收者
+
+```java
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+/**
+ * description:
+ * author:klaus
+ * date:2019/11/20
+ * co:
+ */
+public class Send {
+    private final static String QUEUE_NAME = "hello";
+
+    public static void main(String[] args) {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("172.16.3.17");//ip
+        factory.setPort(5672);//port
+        factory.setUsername("root");//username
+        factory.setPassword("Zywlw2018");//password
+        try (Connection connection = factory.newConnection();
+             Channel channel = connection.createChannel()) {
+            channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+            String message = "Hello World!";
+            channel.basicPublish("",QUEUE_NAME, null, message.getBytes());
+            System.out.println(" [x] Sent '" + message + "'");
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+
+
+## 参考：
+
+[rabbitmq官网](https://www.rabbitmq.com/)
+
+[子暃之路博客](https://blog.zenfery.cc/topics/mq)
 
