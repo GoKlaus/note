@@ -376,9 +376,119 @@ Why don't we use a try-with-resource statement to automatically close the channe
 
  ![img](rabbitmq.assets/python-two.png) 
 
- 这个概念适合web项目，一次HTTP请求时间有限，对于复杂处理业务的请求，很难保证相应时间 
+ 这个概念适合web项目，一次HTTP请求时间有限，对于复杂处理业务的请求，很难保证响应时间 
+
+## 轮询分发调度
+
+使用工作队列（Working Queues）利于并行处理
+
+消息积压，可以通过增加消费者（worker）进行扩充
+
+轮询分发依次分发C1，C2，C3.......，然后继续新的回合
+
+ 采用的是轮巡制（不会因某个消费者上的任务执行时间过长，导致消息会传递到其它消费者上处理）
+
+## Message acknowledgment
+
+消息应答机制
+
+如果消息传递给消费者，立马将队列中消息删除，不考虑消费者是否真正处理消息，例如消费者宕机了，存在风险
+
+为了避免消息的丢失，消费者和队列之间建立了应答机制，应答机制由开发者决定开启与否
+
+rabbit在等待ack的过程中：
+
+- channel 关闭
+- connection关闭
+- TCP断联
+
+认为consumer死亡，重新开启传递给另一个consumer
+
+rabbitmq等待过程中，没有消息超时机制，如果没有出现让rabbit判断consumer挂掉的条件，rabbitmq会一直等下去，即使任务执行了很长时间
+
+
+
+
 
 ## java
+
+```java
+package com.opco.rd.producer;
+
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DeliverCallback;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+/**
+ * description:
+ * author:zhaoxingbao
+ * date:2019/11/21
+ * co:
+ */
+public class Worker {
+
+    private static final String TASK_QUEUE_NAME = "task_name";
+
+    public static void main(String[] args) throws IOException, TimeoutException {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("172.16.3.17");
+        factory.setPort(5672);//port  the default is 5672 if don't specified
+        factory.setUsername("root");
+        factory.setPassword("Zywlw2018");
+
+        final Connection connection = factory.newConnection();
+        final Channel channel = connection.createChannel();
+
+        channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
+        System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+
+        channel.basicQos(1);
+
+        DeliverCallback deliverCallback = (cosumerTag, delivery) -> { 
+            String message = new String(delivery.getBody(), "UTF-8");
+            
+            System.out.println(" [x] Received '" + message + "'");
+            try {
+                doWork(message);
+            } finally {
+                System.out.println(" [x] Done");
+                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+            }
+        };
+
+        channel.basicConsume(TASK_QUEUE_NAME, false, deliverCallback, consumerTag -> {});
+        
+
+    }
+
+    private static void doWork(String task) {
+        for (char ch : task.toCharArray()) {
+            if (ch == '.') {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+    }
+}
+```
+
+
+
+```java
+channel.queueDeclare(var1, var2, var3, var4, var5);
+var1---
+var2---
+var3---
+var4---
+var5---
+```
 
 
 
