@@ -406,9 +406,65 @@ rabbit在等待ack的过程中：
 
 rabbitmq等待过程中，没有消息超时机制，如果没有出现让rabbit判断consumer挂掉的条件，rabbitmq会一直等下去，即使任务执行了很长时间
 
+tip：
 
+忘记ack的后果：
 
+```text
+没有返回ack会导致队列中积攒越来越多的数据，占用越多的内存
+```
 
+## Message durability
+
+消息持久化
+
+上述的情况可以保证消费者宕机而消息不丢失，但不能保证mq服务器宕机消息不丢失。
+
+所以需要设置
+
+1. 队列标记为持久化
+2. 消息标记为持久化
+
+队列持久化声明：
+
+```java
+boolean durable = true;
+channel.queueDeclare("hello", durable, false, false, null);
+```
+
+tip:
+
+```
+在这种情况下，已经声明一个hello队列是不是持久化的，再次声明同名的会报错，mq不允许用新的参数重新定义一个已经存在的队列
+```
+
+消息持久化声明：
+
+通过声明：
+
+```java
+import com.rabbitmq.client.MessageProperties;
+
+channel.basicPublish("", "task_queue", MessageProperties.PERSISRENT_TEST_PLAIN, message.getBytes());
+```
+
+tip:
+
+昨晚以上两步设置，还不能完全保证持久化消息，mq不是对所有的消息执行`fsync(2)`方法，可能存在缓存中，并不是存在硬盘上，如果需要更强的保证，可以使用发布确认（[publisher confirms](https://www.rabbitmq.com/confirms.html)）机制
+
+## Fair dispatch
+
+公平分发机制
+
+ ![img](rabbitmq.assets/prefetch-count.png) 
+
+但消息分发有时候还是不能达到预期。比如在两个work的场景下，当所有奇数序号的消息均为重量级任务，而偶数序号的消息均为轻量级的，那么就会有一个队列非常繁忙，而另一个几乎什么都不做。RabbitMQ将不会知道这些，它还是会均匀地分发消息。
+
+这种现象的产生是由于当一个消息进入队列后，RabbitMQ就会立即分发这个消息，而不会关心从消费者客户端返回了多少应答消息。它已经提前将第n个消息分发给了对应的第n个消费者。
+
+为了改善这种问题，可以使用basicQos()方法来设置，传入参数为1。它告知RabbitMQ在同一时间最多只能给一个worker分发一条消息，换句话说就是在worker处理完并返回一个应答之前，不要再分发一个消息给它，结果RabbitMQ会将消息分发给那些空闲的worker。
+
+ 注意：==如果所有的worker都非常繁忙，队列可能会被填满。需要时常关注它，可能需要增加worker来解决它，或者使用其它策略==。 
 
 ## java
 
@@ -489,6 +545,148 @@ var3---
 var4---
 var5---
 ```
+
+```java
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.MessageProperties;
+
+public class NewTask {
+
+    private static final String TASK_QUEUE_NAME = "task_queue";
+
+    public static void main(String[] argv) throws Exception {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+        try (Connection connection = factory.newConnection();
+             Channel channel = connection.createChannel()) {
+            channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
+
+            String message = String.join(" ", argv);
+
+            channel.basicPublish("", TASK_QUEUE_NAME,
+                    MessageProperties.PERSISTENT_TEXT_PLAIN,
+                    message.getBytes("UTF-8"));
+            System.out.println(" [x] Sent '" + message + "'");
+        }
+    }
+
+}
+```
+
+
+
+
+
+# Publiser/Subscibe
+
+- **生产者（Producer）**：产生消息。
+- **队列（Queue）**：存储消息的缓存区。
+- **消费者（Consumer）**：接收消息。
+
+RabbitMQ消息组件的核心设计架构是生产者从来都不会将消息直接发送至队列中，实际上，生产者甚至一点都不了解消息是否被传送至队列中。
+
+ direct、topic、headers、fanout  四种类型的交换机。
+
+  生产者仅可以将消息发送至一个交换机（Exchange）。 一个交换机是非常简单的东西。一方面是从生产者接收消息，另一方面是将消息发送至队列中。交换机必须知道如何处理它接收到的消息：发送至一个队列，发送至多个队列，或者丢弃。这些规则由交换机类型来定义。 
+
+## Temparay queues
+
+```java
+channel.basicPublish("", "hello", null, message.getBytes());//默认发送到default exchange
+
+channel.basicPublish( "logs", "", null, message.getBytes());//发送到交logs的交换机
+```
+
+无论何时连接至RabbitMQ都将会是一个全新的、空的队列。为此，需要队列名称为自动生成，甚至可以把自动生成队列名称的事情交给RabbitMQ Server。
+
+其次，一旦消费者断开连接，其绑定的队列将会自动删除。
+
+在使用Java客户端时，只需要不给方法queueDeclare()传递参数，即会创建一个名字为自动生成的、非持久化的、独一无二的、自动清除的队列：
+
+```java
+String queueName = channel.queueDeclare().getQueue();
+```
+
+ 生成的随机名称可能为这种格式：amq.gen-JzTY20BRgKO-HjmUJj0wLg。 
+
+## Bindings
+
+ ![img](rabbitmq.assets/bindings.png) 
+
+ 到此为止，已经创建了广播交换机和队列。下面需要告知交换机将消息发送给所有的队列。队列和交换机之间的这种关系叫做**绑定**。 
+
+```java
+channel.queueBind(queueName, "logs", "");
+```
+
+ 产生消息的生产者程序，看起来和之前的程序并没有太大的差别，最大的差别是：之前发布消息是发至未命名的交换机，现在将消息发布至logs交换机。在此处指定routingKey对广播交换机来说是无用的。下面是生产者EmitLog.java程序： 
+
+```java
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+
+public class EmitLog {
+
+    private static final String EXCHANGE_NAME = "logs";
+
+    public static void main(String[] argv) throws Exception {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+        try (Connection connection = factory.newConnection();
+             Channel channel = connection.createChannel()) {
+            //声明交换机，名称，类型
+            channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+
+            String message = argv.length < 1 ? "info: Hello World!" :
+                    String.join(" ", argv);
+
+            channel.basicPublish(EXCHANGE_NAME, "", null, message.getBytes("UTF-8"));
+            System.out.println(" [x] Sent '" + message + "'");
+        }
+    }
+
+}
+```
+
+
+
+在建立连接之后，紧接着声明了交换机，这一步是必需的，因为禁止向未知的交换机发送消息。在没有队列绑定至此交换机时，消息将会全部丢失，在日志系统中这样是没有问题的。如果没有消费者进行监听，丢掉消息是安全的。ReceiveLogs.java的具体代码如下
+
+```java
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DeliverCallback;
+
+public class ReceiveLogs {
+    private static final String EXCHANGE_NAME = "logs";
+
+    public static void main(String[] argv) throws Exception {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+        Connection connection = factory.newConnection();
+        Channel channel = connection.createChannel();
+
+        channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+        String queueName = channel.queueDeclare().getQueue();
+        //fanout类型交换机，没有用上routekey
+        channel.queueBind(queueName, EXCHANGE_NAME, "");
+
+        System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+
+        DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+            String message = new String(delivery.getBody(), "UTF-8");
+            System.out.println(" [x] Received '" + message + "'");
+        };
+        channel.basicConsume(queueName, true, deliverCallback, consumerTag -> { });
+    }
+}
+```
+
+
 
 
 
