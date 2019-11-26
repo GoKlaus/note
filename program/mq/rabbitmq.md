@@ -686,7 +686,332 @@ public class ReceiveLogs {
 }
 ```
 
+# Routing
 
+不同于之前的Publish/Subscribe，路由可以根据不同的`routingKey`发送给不同的消费者，消费者前提是关注这个`routingKey`的队列
+
+## Bindings
+
+绑定
+
+```java
+channel.queueBind(queueName, EXCHANGE_NAME, "");
+```
+
+ 绑定即交换机和队列之间的一个关系。可以简单理解为：该队列关注此交换机中的消息。绑定方法可以传入一个`routingKey`参数，为了避免和basic_publish参数混淆，将它叫做**绑定关键字（binding key）**。下面是如何使用关键字来进行绑定： 
+
+```java
+channel.queueBind(queueName, EXCHANGE_NAME, "black");
+```
+
+ 绑定关键字的意义视交换机类型而定。先前使用的广播交换机（fanout）将会忽略该关键字 
+
+## Direct exchange
+
+Direct交换机
+
+ 广播交换机不能提供复杂的特性，它仅能实现简单的广播机制。下面使用direct交换机来代替广播（fanout）交换机，direct交换机的路由算法相对简单：只有队列的绑定关键字和消息的路由关键字完全匹配时，消息才能够发送至队列。如下图的路由机制 
+
+ ![img](rabbitmq.assets/direct-exchange.png) 
+
+ 可以看出在此路由机制下，有两个队列绑定在同一个direct类型的交换机上。第一个使用orange关键字进行绑定，第二个队列有两个绑定关键字，black和green。在此机制下，使用路由关键字orange发布的消息将会被发布至队列Q1，使用路由关键字black或green将会至Q2，其它所有的消息将会被丢弃。 
+
+## Multiple bindings
+
+多重绑定
+
+ ![img](rabbitmq.assets/direct-exchange-multiple.png) 
+
+ 多个队列使用相同的绑定关键字是非常合法的，在上图所示的例子中，在例子中，可以为Q1增加一个绑定关键字black绑定至交换机X。在这种情况下，direct交换机就像fanout交换机一样，将会广播消息至所有匹配的队列中。使用路由关键字black的消息将会传送至Q1和Q2。 
+
+## Emitting logs
+
+发送日志
+
+ 在日志系统中使用这种模型，使用direct交换机代替fanout交换机来发送消息。使用日志级别做为路由关键字，接收程序可以选择它想要接收的级别的日志。 
+
+创建交换机：
+
+```java
+channel.exchangeDeclare(EXCHANGE_NAME, "direct");
+```
+
+ 发送消息： 
+
+```java
+channel.basicPublish(EXCHANGE_NAME, severity, null, message.getBytes());
+```
+
+ 在上面的代码中，可以假定变量severity可取值为：info、warning、error 
+
+## Subscribing
+
+订阅消息
+
+```java
+String queueName = channel.queueDeclare().getQueue();
+
+for(String severity : argv){
+  channel.queueBind(queueName, EXCHANGE_NAME, severity);
+}
+```
+
+## Putting it all together
+
+代码整合
+
+ ![img](rabbitmq.assets/python-four.png) 
+
+```java
+import com.rabbitmq.client.BuiltinExchangeType;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+
+public class EmitLogDirect {
+
+    private static final String EXCHANGE_NAME = "direct_logs";
+
+    public static void main(String[] argv) throws Exception {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("172.16.3.17");
+        factory.setPort(5672);
+        factory.setUsername("root");
+        factory.setPassword("Zywlw2018");
+        try (Connection connection = factory.newConnection();
+             Channel channel = connection.createChannel()) {
+            //create exchange
+            channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.DIRECT);
+
+            String severity = getSeverity(argv);
+            String message = getMessage(argv);
+            
+            //publish message with routing key severity
+            channel.basicPublish(EXCHANGE_NAME, severity, null, message.getBytes("UTF-8"));
+            System.out.println(" [x] Sent '" + severity + "':'" + message + "'");
+        }
+    }
+
+    private static String getSeverity(String[] strings) {
+        if (strings.length < 1)
+            return "info";
+        return strings[0];
+    }
+
+    private static String getMessage(String[] strings) {
+        if (strings.length < 2)
+            return "Hello World!";
+        return joinStrings(strings, " ", 1);
+    }
+
+    private static String joinStrings(String[] strings, String delimiter, int startIndex) {
+        int length = strings.length;
+        if (length == 0) return "";
+        if (length <= startIndex) return "";
+        StringBuilder words = new StringBuilder(strings[startIndex]);
+        for (int i = startIndex + 1; i < length; i++) {
+            words.append(delimiter).append(strings[i]);
+        }
+        return words.toString();
+    }
+}
+```
+
+
+
+```java
+import com.rabbitmq.client.*;
+
+public class ReceiveLogsDirect {
+
+    private static final String EXCHANGE_NAME = "direct_logs";
+
+    public static void main(String[] argv) throws Exception {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+        factory.setPort("5672");//default port 
+        factory.setUsername("root");
+        factory.setPassword("Zywlw2018");
+        Connection connection = factory.newConnection();
+        Channel channel = connection.createChannel();
+
+        channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.DIRECT);
+        //创建临时队列，不用直接销毁
+        String queueName = channel.queueDeclare().getQueue();
+
+        if (argv.length < 1) {
+            System.err.println("Usage: ReceiveLogsDirect [info] [warning] [error]");
+            System.exit(1);
+        }
+
+        for (String severity : argv) {
+            channel.queueBind(queueName, EXCHANGE_NAME, severity);
+        }
+        System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+
+        DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+            String message = new String(delivery.getBody(), "UTF-8");
+            System.out.println(" [x] Received '" + delivery.getEnvelope().getRoutingKey() + "':'" + message + "'");
+        };
+        channel.basicConsume(queueName, true, deliverCallback, consumerTag -> {
+        });
+    }
+}
+
+```
+
+# Topic
+
+主题模式
+
+ 广播（fanout）交换机仅能够广播消息，使用direct交换机，可以对消息进行筛选过滤。尽管使用direct交换机改进了日志系统，但它还是有所限制，它不能使用更复杂的路由规则 。
+
+ 在日志系统中，可能不仅仅订阅基于日志级别的筛选消息，日志可能来自不同的源，也要加以区分。像`unix`的syslog日志，它即可以区分日志级别（`info/warn/crit…`），也可以使用其它更灵活的区分机制（`auth/cron/kern…`）。如果想监听特殊的错误日志、`cron`产生的日志以及kern产生的所有日志，这将会复杂一些。为了实现此功能，需要了解主题交换机（topic）。 
+
+## Topic exchange
+
+主题交换机
+
+ 被发送至主题交换机的消息不可以是任意的路由关键字，它必须是以点号分隔的多个单词串。这些单词可以任意，通常是和消息的特性有关，如下一些有效的路由关键字：”stock.usd.nyse”, “nyse.vmw”, “quick.orange.rabbit”。路由关键字的上限是255 bytes 。
+
+发送到主题交换机的不能是任意的routing key ，必须是一组以 `.` 分隔的词，
+
+例如
+
+```
+stock.usd.nyse
+nyse.vmw
+quick.orange.rabbit
+```
+
+绑定key也是以同样的格式，topic 交换机的逻辑类似于direct 交换机，消息只会发送到binding key 匹配的队列中，支持匹配：
+
+- \* (star) can substitute for exactly one word.
+- \# (hash) can substitute for zero or more words.
+
+ ![img](rabbitmq.assets/python-five.png) 
+
+一个消息以` quick.orange.rabbit `routing key 发送到Q1 Q2
+
+一个消息以 `lazy.orange.elephant` routing key 发送到 Q1 Q2
+
+` quick.orange.male.rabbit `不会匹配以上任意一个
+
+` lazy.orange.male.rabbit `会匹配Q2
+
+tip
+
+```
+注意：主题交换机功能强大，它可以模拟其它的交换机功能。
+
+如果队列使用”#”绑定关键字，它将匹配所有的路由关键字而接收所有的消息，正如fanout交换机的功能所示。
+
+如果队列的绑定关键字未使用字符”#”和”*”，那么主题关键字将会表现出direct交换机的特性
+```
+
+## Putting it all together
+
+```java
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+
+public class EmitLogTopic {
+
+    private static final String EXCHANGE_NAME = "topic_logs";
+
+    public static void main(String[] argv) throws Exception {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+        try (Connection connection = factory.newConnection();
+             Channel channel = connection.createChannel()) {
+
+            channel.exchangeDeclare(EXCHANGE_NAME, "topic");
+
+            String routingKey = getRouting(argv);
+            String message = getMessage(argv);
+
+            channel.basicPublish(EXCHANGE_NAME, routingKey, null, message.getBytes("UTF-8"));
+            System.out.println(" [x] Sent '" + routingKey + "':'" + message + "'");
+        }
+    }
+
+    private static String getRouting(String[] strings) {
+        if (strings.length < 1)
+            return "anonymous.info";
+        return strings[0];
+    }
+
+    private static String getMessage(String[] strings) {
+        if (strings.length < 2)
+            return "Hello World!";
+        return joinStrings(strings, " ", 1);
+    }
+
+    private static String joinStrings(String[] strings, String delimiter, int startIndex) {
+        int length = strings.length;
+        if (length == 0) return "";
+        if (length < startIndex) return "";
+        StringBuilder words = new StringBuilder(strings[startIndex]);
+        for (int i = startIndex + 1; i < length; i++) {
+            words.append(delimiter).append(strings[i]);
+        }
+        return words.toString();
+    }
+}
+
+```
+
+
+
+```java
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DeliverCallback;
+
+public class ReceiveLogsTopic {
+
+    private static final String EXCHANGE_NAME = "topic_logs";
+
+    public static void main(String[] argv) throws Exception {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+        Connection connection = factory.newConnection();
+        Channel channel = connection.createChannel();
+
+        channel.exchangeDeclare(EXCHANGE_NAME, "topic");
+        String queueName = channel.queueDeclare().getQueue();
+
+        if (argv.length < 1) {
+            System.err.println("Usage: ReceiveLogsTopic [binding_key]...");
+            System.exit(1);
+        }
+
+        for (String bindingKey : argv) {
+            channel.queueBind(queueName, EXCHANGE_NAME, bindingKey);
+        }
+
+        System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+
+        DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+            String message = new String(delivery.getBody(), "UTF-8");
+            System.out.println(" [x] Received '" + delivery.getEnvelope().getRoutingKey() + "':'" + message + "'");
+        };
+        channel.basicConsume(queueName, true, deliverCallback, consumerTag -> { });
+    }
+}
+```
+
+tip
+
+```
+注意:
+
+“#.*” 将会匹配”..”或”.”路由关键字，它还可以匹配单个单词的路由关键字。
+
+“*” 将不匹配单个路由关键字，它也不能匹配空字符串的路由关键字。
+```
 
 
 
