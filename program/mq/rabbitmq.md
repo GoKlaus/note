@@ -890,6 +890,7 @@ quick.orange.rabbit
 - \# (hash) can substitute for zero or more words.
 
  ![img](rabbitmq.assets/python-five.png) 
+ ![aaa](rabbitmq.assets/python-five.png "aaa")
 
 一个消息以` quick.orange.rabbit `routing key 发送到Q1 Q2
 
