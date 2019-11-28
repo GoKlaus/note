@@ -790,6 +790,8 @@ Assert.assertEquals(str, str2);
 
 ## 散列算法
 
+Hash算法
+
 散列算法：一种不可逆的算法
 
 常见散列算法MD5、SHA。
