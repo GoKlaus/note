@@ -178,3 +178,9 @@ idea ide 中使用uml
 free mybatis plugin  生成xml文件
 ```
 
+## 11.29
+
+```
+ehcache 了解使用
+```
+
