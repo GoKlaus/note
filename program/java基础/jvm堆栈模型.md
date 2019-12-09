@@ -1,4 +1,4 @@
-![ä¸å¼ å¾çæJavaèææºåå­åºåæ¨¡å](assets/v2-44bd7abefcaade091c1511cc59d488c6_1200x500.jpg)
+![](assets/v2-44bd7abefcaade091c1511cc59d488c6_1200x500.jpg)
 
 ## 1.程序计数器（Program Counter Register）
 
