@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>effective-java.html</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+
+</head>
+
+<body>
+
+<h1 id="effective-java">Effective-java</h1>
+<p>[toc]</p>
+<h2 id="chapter-01">chapter 01</h2>
+<h3 id="考虑使用静态工厂方法替代构造方法">1. 考虑使用静态工厂方法替代构造方法</h3>
+<p>优点： 第一个优点是，与构造方法不同，它们是有名字的。</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">public</span> <span class="dt">static</span> <span class="bu">Boolean</span> <span class="fu">valueOf</span>(<span class="dt">boolean</span> b) {</a>
+<a class="sourceLine" id="cb1-2" title="2">    <span class="kw">return</span> b ? <span class="bu">Boolean</span>.<span class="fu">TRUE</span> : <span class="bu">Boolean</span>.<span class="fu">FALSE</span>;</a>
+<a class="sourceLine" id="cb1-3" title="3">}</a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode java"><code class="sourceCode java"><a class="sourceLine" id="cb2-1" title="1"><span class="bu">Calendar</span>.<span class="fu">getInstance</span>();</a></code></pre></div>
+<p>第二个优点是，与构造方法不同，它们不需要每次调用时都创建一个新对象 静态工厂方法重复调用返回相同实例这个特点可以让类在任何时候都能对实例保持严格的控制。这样做的类被称为实例控制类（ instance-controlled）。</p>
+<p>第三个优点是，与构造方法不同，它们可以返回其返回类型的任何子类型的对象。</p>
+<p>第四个优点是返回对象的类可以根据输入参数的不同而不同。 第五个优点是，在编写包含该方法的类时，返回的对象的类不需要存在。</p>
+<p>缺点： 没有公共或受保护构造方法的类不能被子类化。 藏在api文档里不容易发现</p>
+<ul>
+<li>from —— 类型转换方法，它接受单个参数并返回此类型的相应实例，例如：Date d = Date.from(instant);</li>
+<li>of —— 聚合方法，接受多个参数并返回该类型的实例，并把他们合并在一起，例如：Set faceCards = EnumSet.of(JACK, QUEEN, KING);</li>
+<li>valueOf —— from 和 to 更为详细的替代 方式，例如：BigInteger prime = BigInteger.valueOf(Integer.MAX_VALUE);</li>
+<li>instance 或 getinstance —— 返回一个由其参数 (如果有的话) 描述的实例，但不能说它具有相同的值，例如：StackWalker luke = StackWalker.getInstance(options);</li>
+<li>create 或 newInstance —— 与 instance 或 getInstance 类似，除此之外该方法保证每次调用返回一个新的实例，例如：Object newArray = Array.newInstance(classObject, arrayLen);</li>
+<li>getType —— 与 getInstance 类似，但是在工厂方法处于不同的类中的时候使用。getType 中的 Type 是工厂方法返回的对象类型，例如：FileStore fs = Files.getFileStore(path);</li>
+<li>newType —— 与 newInstance 类似，但是在工厂方法处于不同的类中的时候使用。newType中的 Type 是工厂方法返回的对象类型，例如：BufferedReader br = Files.newBufferedReader(path);</li>
+<li>type —— getType 和 newType 简洁的替代方式，例如：List litany = Collections.list(legacyLitany);</li>
+</ul>
+<h3 id="当构造方法参数过多时使用-builder-模式">2. 当构造方法参数过多时使用 builder 模式</h3>
+
+</body>
+</html>
