@@ -901,3 +901,44 @@ public static void main(String[] args) {
 
 
 
+# AOP
+
+oop的补充
+
+
+
+## aspectj框架
+
+### 概念：
+
+@Aspect
+
+@Pointcut
+
+@Before
+
+@After
+
+@Aroud
+
+
+
+
+
+# Reflect
+
+java.lang.reflect
+
+Class 类在java lang 包
+
+获取Method对象的区别
+
+```java
+xxx.getClass().getMethod();
+xxx.class.getMethod();
+
+xxx.getClass().getDeclaringMethod();
+xxx.class.getDeclaringMethod();
+//可以获取private method
+```
+
