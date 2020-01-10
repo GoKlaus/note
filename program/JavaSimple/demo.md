@@ -274,7 +274,7 @@ bug是不可避免的，开发中应该遵循一套原则来尽量避免明显�
 不相信任何人的代码，检查所有输入和返回值，处理所有异常
 代码写三遍
 第一遍将逻辑写通
-第二遍完善代码：检查是否遗漏的异常没有处理，是否有富案件的地方日志没有加，是否不符合编程规范
+第二遍完善代码：检查是否遗漏的异常没有处理，是否有的地方日志没有加，是否不符合编程规范
 第三遍优化代码：逻辑是否可以优化，某些处理是否可以用更好的方式
 
 ### 三个条件
@@ -895,5 +895,50 @@ public static void main(String[] args) {
         person.Eat();
     }
 
+```
+
+
+
+
+
+# AOP
+
+oop的补充
+
+
+
+## aspectj框架
+
+### 概念：
+
+@Aspect
+
+@Pointcut
+
+@Before
+
+@After
+
+@Aroud
+
+
+
+
+
+# Reflect
+
+java.lang.reflect
+
+Class 类在java lang 包
+
+获取Method对象的区别
+
+```java
+xxx.getClass().getMethod();
+xxx.class.getMethod();
+
+xxx.getClass().getDeclaringMethod();
+xxx.class.getDeclaringMethod();
+//可以获取private method
 ```
 

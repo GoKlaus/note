@@ -74,6 +74,8 @@ spring3
 ![8d7c16e7610c9d31e2edfd1b14795374.png](assets/Image.png)
 `所以可以直接引入context包`
 
+
+
 ##### AOP
 `AOP部分包含六个模块`
 
@@ -450,11 +452,11 @@ k、reference  pointcut：表示引用其他命名切入点，只有@AspectJ风�
 
    　　1. 如果同时指定了name和type，则从Spring上下文中找到唯一匹配的bean进行装配，找不到则抛出异常
 
-   　　2. 如果指定了name，则从上下文中查找名称（id）匹配的bean进行装配，找不到则抛出异常
+      　　2. 如果指定了name，则从上下文中查找名称（id）匹配的bean进行装配，找不到则抛出异常
 
-   　　3. 如果指定了type，则从上下文中找到类型匹配的唯一bean进行装配，找不到或者找到多个，都会抛出异常
+             　　3. 如果指定了type，则从上下文中找到类型匹配的唯一bean进行装配，找不到或者找到多个，都会抛出异常
 
-   　　4. 如果既没有指定name，又没有指定type，则自动按照byName方式进行装配；如果没有匹配，则回退为一个原始类型进行匹配，如果匹配则自动装配；      
+                   　　4. 如果既没有指定name，又没有指定type，则自动按照byName方式进行装配；如果没有匹配，则回退为一个原始类型进行匹配，如果匹配则自动装配；      
 
 
 
@@ -500,4 +502,72 @@ postProcessBeanFactory？？？
 Spring 容器在启动时，会加载默认的一些 PostPRocessor，其中就有 ConfigurationClassPostProcessor，这个后置处理程序专门处理带有 @Configuration 注解的类，这个程序会在 bean 定义加载完成后，在 bean 初始化前进行处理。主要处理的过程就是使用 cglib 动态代理增强类，而且是对其中带有 @Bean 注解的方法进行处理。
 
 在 ConfigurationClassPostProcessor 中的 postProcessBeanFactory 方法中调用了下面的方法：
+
+
+
+# MIME
+
+**媒体类型**（通常称为 **Multipurpose Internet Mail Extensions** 或 **MIME** 类型 ）是一种标准，用来表示文档、文件或字节流的性质和格式。它在[IETF RFC 6838](https://tools.ietf.org/html/rfc6838)中进行了定义和标准化。
+
+## 通用结构
+
+```
+type/subtype
+```
+
+MIME的组成结构非常简单；由类型与子类型两个字符串中间用`'/'`分隔而组成。不允许空格存在。*type* 表示可以被分多个子类的独立类别。*subtype 表示细分后的每个类型。*
+
+MIME类型对大小写不敏感，但是传统写法都是小写。
+
+### 独立类型
+
+
+
+```
+text/plain
+text/html
+image/jpeg
+image/png
+audio/mpeg
+audio/ogg
+audio/*
+video/mp4
+application/*
+application/json
+application/javascript
+application/ecmascript
+application/octet-stream
+…
+```
+
+*独立*类型表明了对文件的分类，可以是如下之一：
+
+| 类型          | 描述                                                         | 典型示例                                                     |
+| :------------ | :----------------------------------------------------------- | :----------------------------------------------------------- |
+| `text`        | 表明文件是普通文本，理论上是人类可读                         | `text/plain`, `text/html`, `text/css, text/javascript`       |
+| `image`       | 表明是某种图像。不包括视频，但是动态图（比如动态gif）也使用image类型 | `image/gif`, `image/png`, `image/jpeg`, `image/bmp`, `image/webp`, `image/x-icon`, `image/vnd.microsoft.icon` |
+| `audio`       | 表明是某种音频文件                                           | `audio/midi`, `audio/mpeg, audio/webm, audio/ogg, audio/wav` |
+| `video`       | 表明是某种视频文件                                           | `video/webm`, `video/ogg`                                    |
+| `application` | 表明是某种二进制数据                                         | `application/octet-stream`, `application/pkcs12`, `application/vnd.mspowerpoint`, `application/xhtml+xml`, `application/xml`, `application/pdf` |
+
+对于text文件类型若没有特定的subtype，就使用 `text/plain`。类似的，二进制文件没有特定或已知的 subtype，即使用 `application/octet-stream`。
+
+### Multipart 类型
+
+
+
+```
+multipart/form-data
+multipart/byteranges
+```
+
+*Multipart* 类型表示细分领域的文件类型的种类，经常对应不同的 MIME 类型。这是*复合*文件的一种表现方式。`multipart/form-data` 可用于联系 [HTML Forms](https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms) 和 [`POST`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/POST) 方法，此外 `multipart/byteranges`使用状态码[`206`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/206) `Partial Content`来发送整个文件的子集，而HTTP对不能处理的复合文件使用特殊的方式：将信息直接传送给浏览器（这时可能会建立一个“另存为”窗口，但是却不知道如何去显示内联文件。）
+
+
+
+参考：
+
+[MIME](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types)
+
+
 
