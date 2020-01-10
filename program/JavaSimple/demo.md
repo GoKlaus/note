@@ -942,3 +942,81 @@ xxx.class.getDeclaringMethod();
 //可以获取private method
 ```
 
+获取实现接口
+
+## [类型体系](https://www.jianshu.com/p/e8eeff12c306)
+
+### ParameterizedType 表示参数化类型，也就是泛型，例如List<T>
+
+1.  getActualTypeArguments() ---获取泛型中的实际类型，可能会存在多个泛型，例如Map<K,V>,所以会返回Type[]数组
+2. getRawType()---获取声明泛型的类或者接口，也就是泛型中<>前面的那个值
+3. getOwnerType()---可以获取到内部类的“拥有者”；例如： Map 就是 Map.Entry<String,String>的拥有者
+
+```java
+xxx.getGenericInterfaces();
+
+//获取带泛型的接口
+Type[] types = xxx.getGenericInterfaces();
+for (Type type : type ) {
+    if (type instanceof ParameterizedType) {
+        //判断是不是带泛型的接口
+    }
+}
+
+//获取父类 
+xxx.getGenericSuperclass();
+
+p.get
+```
+
+### GenericArrayType
+
+泛型数组类型，例如List<String>[] 、T[]等
+
+```java
+private T[] t;
+private List<String>[] listArray;
+
+public static void main(String[] args) throws NoSuchFieldException {
+    Field fieldListArray = GenericArrayListTest.class.getDeclareField("listArray");
+    Type typeListArray = fieldListArray.getGenericType();
+    System.out.println(typeListArray.getClass().getName());
+    Field fieldT = GenericArrayTypeTest.class.getDeclareField("listArray");
+    Type typeT = fieldT.getGenericType();
+    System.out.println(typeT.getClass().getName());
+}
+```
+
+在GenericArrayType接口中，仅有1个方法，就是getGenericComponentType()；
+
+返回泛型数组中元素的Type类型，即List<String>[] 中的 List<String>（ParameterizedTypeImpl）、T[] 中的T（TypeVariableImpl）
+
+==值得注意的是，无论是几维数组，getGenericComponentType()方法都只会脱去最右边的[]，返回剩下的值==；
+
+### TypeVariable
+
+泛型的类型变量，指的是List<T>、Map<K,V>中的T，K，V等值，实际的Java类型是TypeVariableImpl（TypeVariable的子类）；此外，还可以对类型变量加上extend限定，这样会有类型变量对应的上限
+
+```java
+
+    private List<K> listArray;
+
+    public static void main(String[] args) throws NoSuchFieldException {
+        Field fieldList = HashMapCopy.class.getDeclaredField("listArray");
+        Type type = fieldList.getGenericType();
+
+        if (type instanceof ParameterizedType) {
+            Type[] arguments =
+                    ((ParameterizedType) type).getActualTypeArguments();
+            System.out.println(arguments[0].getClass().getName());
+            
+            
+        }
+    }
+```
+
+getBounds()---获得该类型变量的上限，也就是泛型中extend右边的值；例如 List<T extends Number> ，Number就是类型变量T的上限；如果我们只是简单的声明了List<T>（无显式定义extends），那么默认为Object；
+
+getGenericDeclaration()---获取声明该类型变量实体，也就是TypeVariableTest<T>中的TypeVariableTest
+
+getName()---获取类型变量在源码中定义的名称；

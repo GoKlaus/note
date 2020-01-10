@@ -114,3 +114,85 @@ NutritionFacts cocaCola = new NutritionFacts.Builder(240, 8)
 
 ```
 
+## chapter03
+
+### [9.使用 try-with-resources 语句替代 try-finally 语句](http://sjsdfg.gitee.io/effective-java-3rd-chinese/#/notes/09. 使用try-with-resources语句替代try-finally语句?id=_9-使用-try-with-resources-语句替代-try-finally-语句)
+
+1、多个try-finally一起使用显的太冗长
+
+2、存在异常风险
+
+```java
+// try-finally is ugly when used with more than one resource!
+static void copy(String src, String dst) throws IOException {
+    InputStream in = new FileInputStream(src);
+    try {
+        OutputStream out = new FileOutputStream(dst);
+        try {
+            byte[] buf = new byte[BUFFER_SIZE];
+            int n;
+            while ((n = in.read(buf)) >= 0)
+                out.write(buf, 0, n);
+        } finally {
+            out.close();
+        }
+    } finally {
+        in.close();
+    }
+}
+```
+
+
+
+
+
+使用try-with-resource需要资源必须实现AutoCloseable接口
+
+```java
+// try-with-resources - the the best way to close resources!
+static String firstLineOfFile(String path) throws IOException {
+    try (BufferedReader br = new BufferedReader(
+           new FileReader(path))) {
+       return br.readLine();
+    }
+}
+
+// try-with-resources on multiple resources - short and sweet
+static void copy(String src, String dst) throws IOException {
+    try (InputStream   in = new FileInputStream(src);
+         OutputStream out = new FileOutputStream(dst)) {
+        byte[] buf = new byte[BUFFER_SIZE];
+        int n;
+        while ((n = in.read(buf)) >= 0)
+            out.write(buf, 0, n);
+    }
+}
+```
+
+### [10. 重写 equals 方法时遵守通用约定](http://sjsdfg.gitee.io/effective-java-3rd-chinese/#/notes/10. 重写equals方法时遵守通用约定?id=_10-重写-equals-方法时遵守通用约定)
+
+如果满足以下任一下条件，则说明是正确的做法：
+
+- 每个类的实例都是固有唯一的。 对于像 Thread 这样代表活动实体而不是值的类来说，这是正确的。 Object 提供的 equals 实现对这些类完全是正确的行为。
+- 类不需要提供一个「逻辑相等（logical equality）」的测试功能。例如 `java.util.regex.Pattern` 可以重写 equals 方法检查两个是否代表完全相同的正则表达式 Pattern 实例，但是设计者并不认为客户需要或希望使用此功能。在这种情况下，从 Object 继承的 equals 实现是最合适的。
+- 父类已经重写了 equals 方法，则父类行为完全适合于该子类。例如，大多数 Set 从 AbstractSet 继承了 equals 实现、List 从 AbstractList 继承了 equals 实现，Map 从 AbstractMap 的 Map 继承了 equals 实现。
+- 类是私有的或包级私有的，可以确定它的 equals 方法永远不会被调用。如果你非常厌恶风险，可以重写 equals 方法，以确保不会被意外调用：
+
+```java
+@Override 
+public boolean equals(Object o) {
+    throw new AssertionError(); // Method is never called
+}
+```
+
+
+
+重写equals ，需要判断逻辑相等的情况（logical equality），有别于对象标识（object identity）
+
+当你重写 equals 方法时，必须遵守它的通用约定。Object 的规范如下： equals 方法实现了一个等价关系（equivalence relation）。它有以下这些属性:
+
+- **自反性：** 对于任何非空引用 x，`x.equals(x)` 必须返回 true。
+- **对称性：** 对于任何非空引用 x 和 y，如果且仅当 `y.equals(x)` 返回 true 时 `x.equals(y)` 必须返回 true。
+- **传递性：** 对于任何非空引用 x、y、z，如果 `x.equals(y)` 返回 true，`y.equals(z)` 返回 true，则 `x.equals(z)` 必须返回 true。
+- **一致性：** 对于任何非空引用 x 和 y，如果在 equals 比较中使用的信息没有修改，则 `x.equals(y)` 的多次调用必须始终返回 true 或始终返回 false。
+- 对于任何非空引用 x，`x.equals(null)` 必须返回 false。
