@@ -1,3 +1,5 @@
+[toc]
+
 ![](assets/v2-44bd7abefcaade091c1511cc59d488c6_1200x500.jpg)
 
 ## 1.程序计数器（Program Counter Register）
@@ -51,3 +53,7 @@
 本机直接内存并不是Java虚拟机运行时数据区的一部分，但它能在一些场景中显著提高性能，因为其避免了在Java堆和Native堆中来回复制数据。
 
 直接内存同样会抛出OutOfMemoryError异常。
+
+
+
+# 

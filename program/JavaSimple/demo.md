@@ -1020,3 +1020,73 @@ getBounds()---获得该类型变量的上限，也就是泛型中extend右边的
 getGenericDeclaration()---获取声明该类型变量实体，也就是TypeVariableTest<T>中的TypeVariableTest
 
 getName()---获取类型变量在源码中定义的名称；
+
+
+
+## 位运算
+
+`|` 或
+
+`>>` 右移
+
+`<<`左移
+
+`~` 非
+
+`^` 异或
+
+`>>>` 和`>>`的区别
+
+
+
+# 类加载器ClassLoader
+
+## 1、类加载器
+
+Java 文件被运行，第一步，需要通过 javac 编译器编译为 class 文件；第二步，JVM 运行 class 文件，实现跨平台。而 JVM 虚拟机第一步肯定是 加载 class 文件，所以，类加载器实现的就是（来自《深入理解Java虚拟机》）：
+
+```
+通过一个类的全限定名来获取描述此类的二进制字节流
+```
+
+类加载器有几个重要的特性：
+
+1. 每个类加载器都有自己的预定义的搜索范围，用来加载 class 文件；
+2. 每个类和加载它的类加载器共同确定了这个类的唯一性，也就是说如果一个 class 文件被不同的类加载器加载到了 JVM 中，那么这两个类就是不同的类，虽然他们都来自同一份 class 文件；
+3. 双亲委派模型。
+   
+
+## 2、双亲委派模型
+
+### 2.1 
+
+1. 所有的类加载器都是有层级结构的，每个类加载器都有一个父类类加载器（通过组合实现，而不是继承），除了**启动类加载器（Bootstrap ClassLoader）**；
+2. 当一个类加载器接收到一个类加载请求时，首先将这个请求委派给它的父加载器去加载，所以每个类加载请求最终都会传递到顶层的**启动类加载器**，如果父加载器无法加载时，子类加载器才会去尝试自己去加载；
+
+通过双亲委派模型就实现了类加载器的三个特性：
+
+1. 委派（delegation）：子类加载器委派给父类加载器加载；
+2. 可见性（visibility）：子类加载器可访问父类加载器加载的类，父类不能访问子类加载器加载的类；
+3. 一性（uniqueness）：可保证每个类只被加载一次，比如 Object 类是被 Bootstrap ClassLoader 加载的，因为有了双亲委派模型，所有的 Object 类加载请求都委派到了 Bootstrap ClassLoader，所以保证了只被加载一次。
+
+### 2.2 Java 中的类加载器
+
+从 JVM 虚拟机的角度来看，只存在两种不同的类加载器：
+
+1. 启动类加载器（Bootstrap ClassLoader），是虚拟机自身的一部分；
+2. 所有其他的类加载器，独立于虚拟机外部，都继承自抽象类 java.lang.ClassLoader。
+
+而绝大多数 Java 应用都会用到如下 3 中系统提供的类加载器：
+
+1. **启动类加载器**（Bootstrap/Primordial/NULL ClassLoader）：顶层的类加载器，没有父类加载器。负责加载 /lib 目录下的，或则被 -Xbootclasspath 参数所指定路径中的，并被 JVM 识别的（仅按文件名识别，如 rt.jar，名字不符合的类库即使放在 lib 目录也不会被加载）类库加载到虚拟机内存中。所有被 Bootstrap classloader 加载的类，它的 Class.getClassLoader 方法返回的都是 null，所以也称作 NULL ClassLoader。
+2. **扩展类加载器**（Extension CLassLoader）：由 sun.misc.Launcher$ExtClassLoader 实现，负责加载 <JAVA_HOME>/lib/ext 目录下，或被 java.ext.dirs 系统变量所指定的目录下的所有类库；
+3. **应用程序类加载器**（Application/System ClassLoader）：由 sun.misc.Launcher$AppClassLoader 实现。它是 ClassLoader.getSystemClassLoader() 方法的默认返回值，所以也称为系统类加载器（System ClassLoader）。它负责加载 classpath 下所指定的类库，如果应用程序没有自定义过自己的类加载器，一般情况下这个就是程序中默认的类加载器。
+
+
+##  Java 程序中的类加载器层级结构图：
+
+![img](https://img-blog.csdn.net/20180914180854640?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3poYW5nc2hrXw==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+
+
+
+它的整个生命周期将会经历加载（Loading）、验证（Verification）、准备（Preparation）、解析（Resolution）、初始化（Initialization）、使用（Using）和卸载（Unloading）七个阶段，其中验证、准备、解析三个部分统称为连接（Linking)

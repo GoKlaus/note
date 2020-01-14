@@ -2,7 +2,7 @@
 
 [toc]
 
-## List
+# List
 
 ### ArrayList<T>
 
@@ -47,4 +47,34 @@ the array into which the element of the arraylist are stored
      */
     transient Object[] elementData; // non-private to simplify nested class access
 ```
+
+# Map
+
+## HashMap
+
+Entry<K,V> tab
+
+int size;
+
+int capacity;
+
+int threshold;
+
+threshold = capacity * 0.75f;
+
+DEFAULT_INITILAL_CAPACITY = 0.75f;
+
+
+
+treeify = 8 
+
+链表化  6;
+
+[红黑树参考笔记](../ComputerSimple/DataStructure.md)
+
+```java
+
+```
+
+
 

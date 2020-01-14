@@ -1,3 +1,15 @@
+# 启动过程
+启动过程，类加载器使用：
+```java
+ClassUtils.getDefaultClassLoader();
+```
+
+
+
+
+
+
+
 # springboot 打包成可执行jar需要
 
 ```xml
