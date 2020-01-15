@@ -12,7 +12,7 @@
 
 
 
-![img](/home/klaus/work_dir/note/程序/redis/redis基础.assets/16e43d17b5ad429a)
+![img]( http://klaus_project.gitee.io/pic/16e43d17b5ad429a)
 
 **Redis**采用的是基于内存的采用的是单进程单线程模型的 KV 数据库，由C语言编写，官方提供的数据是可以达到100000+的**QPS（每秒内查询次数）**。
 
@@ -61,13 +61,13 @@ BloomFilter -- 布隆过滤器
 Bloom Filter跟单哈希函数Bit-Map不同之处在于：Bloom Filter使用了k个哈希函数，每个字符串跟k个bit对应。从而降低了冲突的概率
 
 
-![](redis基础.assets/BloomFilter.jpg)
+![]( http://klaus_project.gitee.io/pic/BloomFilter.jpg)
 
 
 
 ## 缓存击透
 
-![](redis基础.assets/缓存击透.jpg)
+![](http://klaus_project.gitee.io/pic/note/缓存击透.jpg)
 
 
 
@@ -77,7 +77,7 @@ Bloom Filter跟单哈希函数Bit-Map不同之处在于：Bloom Filter使用了k
 
 bloomfilter 如何解决缓存击透问题
 
-![img](/home/klaus/work_dir/note/程序/redis/redis基础.assets/930376-20180502121459501-263550358.png)
+![img]( http://klaus_project.gitee.io/pic/note/930376-20180502121459501-263550358.png)
 
 
 
@@ -107,7 +107,7 @@ bloom filter之所以能做到在时间和空间上的效率比较高，是因�
  根据预估数据量n以及误判率fpp，bit数组大小的m的计算方式： 
 
 
-![](redis基础.assets/bit数组公式.jpg)
+![]( http://klaus_project.gitee.io/pic/note/bit数组公式.jpg)
 
 ### (2)哈希函数选择
 

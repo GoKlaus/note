@@ -25,7 +25,7 @@
 
 
 
- ![img](数据结构.assets/bst.png) 
+ ![img](http://klaus_project.gitee.io/pic/note/bst.png) 
 
 **完全二叉树和满二叉树**
 
@@ -33,11 +33,11 @@
 
 满二叉树（Full Binary Tree）：一棵深度为 h，且有 2h - 1 个节点称之为满二叉树。
 
- ![img](数据结构.assets/完全二叉树和满二叉树.jpg) 
+ ![img](http://klaus_project.gitee.io/pic/note/完全二叉树和满二叉树.jpg) 
 
 
 
- ![img](数据结构.assets/291130561646682.gif) 
+ ![img](http://klaus_project.gitee.io/pic/note/291130561646682.gif) 
 
 ### BST存在的问题
 
@@ -80,7 +80,7 @@ class  Node<T>{
 旋转操作(Rotate)的目的是使节点颜色符合定义，让RBTree的高度达到平衡。
 Rotate分为left-rotate（左旋）和right-rotate（右旋），区分左旋和右旋的方法是：待旋转的节点从左边上升到父节点就是右旋，待旋转的节点从右边上升到父节点就是左旋。
 
- ![img](数据结构.assets/RBTree旋转操作.png) 
+ ![img](http://klaus_project.gitee.io/pic/note/RBTree旋转操作.png) 
 
 ### RBTree的插入操作
 
@@ -100,7 +100,7 @@ RBTree的插入与BST的插入方式是一致的，只不过是在插入过后�
 
 case 1的操作是将父节点和叔叔节点与祖父节点的颜色互换，这样就符合了RBTRee的定义。即维持了高度的平衡，修复后颜色也符合RBTree定义的第三条和第四条。下图中，操作完成后A节点变成了新的节点。如果A节点的父节点不是黑色的话，则继续做修复操作。
 
- ![img](数据结构.assets/红黑插入case-1.png) 
+ ![img](http://klaus_project.gitee.io/pic/note/红黑插入case-1.png) 
 
 
 
@@ -108,13 +108,13 @@ case 1的操作是将父节点和叔叔节点与祖父节点的颜色互换，�
 
 case 2的操作是将B节点进行右旋操作，并且和父节点A互换颜色。通过该修复操作RBTRee的高度和颜色都符合红黑树的定义。如果B和C节点都是右节点的话，只要将操作变成左旋就可以了。
 
- ![img](数据结构.assets/红黑操作case-2.png) 
+ ![img](http://klaus_project.gitee.io/pic/note/红黑操作case-2.png) 
 
 #### 插入操作-case 3
 
 case 3的操作是将C节点进行左旋，这样就从case 3转换成case 2了，然后针对case 2进行操作处理就行了。case 2操作做了一个右旋操作和颜色互换来达到目的。如果树的结构是下图的镜像结构，则只需要将对应的左旋变成右旋，右旋变成左旋即可。
 
- ![img](数据结构.assets/红黑插入case-3.png) 
+ ![img](http://klaus_project.gitee.io/pic/note/红黑插入case-3.png) 
 
 #### 插入操作的总结
 
@@ -155,7 +155,7 @@ case 1这样转换之后就会变成后面的case 2，case 3，或者case 4进�
 
 之所以要做case 1操作是因为兄弟节点是红色的，无法借到一个黑节点来填补删除的黑节点。	
 
- ![img](数据结构.assets/v2-46e732e84148b9bca53e995689e9ba9f_hd.png) 
+ ![img](http://klaus_project.gitee.io/pic/note/v2-46e732e84148b9bca53e995689e9ba9f_hd.png) 
 
 #### 删除操作-case 2
 
@@ -163,7 +163,7 @@ case 2的删除操作是由于兄弟节点可以消除一个黑色节点，因�
 
 case 2这种情况下之所以要将兄弟节点变红，是因为如果把兄弟节点借调过来，会导致兄弟的结构不符合RBTree的定义，这样的情况下只能是将兄弟节点也变成红色来达到颜色的平衡。当将兄弟节点也变红之后，达到了局部的平衡了，但是对于祖父节点来说是不符合定义4的。这样就需要回溯到父节点，接着进行修复操作。
 
- ![img](数据结构.assets/v2-7975d1b235cd30c0bafb716b585ba45d_hd.png) 
+ ![img](http://klaus_project.gitee.io/pic/note/v2-7975d1b235cd30c0bafb716b585ba45d_hd.png) 
 
 #### 删除操作-case 3
 
@@ -171,7 +171,7 @@ case 3的删除操作是一个中间步骤，它的目的是将左边的红色�
 
 之所以说case-3是一个中间状态，是因为根据红黑树的定义来说，下图并不是平衡的，他是通过case 2操作完后向上回溯出现的状态。之所以会出现case 3和后面的case 4的情况，是因为可以通过借用侄子节点的红色，变成黑色来符合红黑树定义4.
 
- ![img](数据结构.assets/v2-04dbb22d25de3849d902582809198596_hd.png) 
+ ![img](http://klaus_project.gitee.io/pic/note/v2-04dbb22d25de3849d902582809198596_hd.png) 
 
 #### 删除操作-case 4
 
@@ -179,7 +179,7 @@ Case 4的操作是真正的节点借调操作，通过将兄弟节点以及兄�
 
 Case 4这种情况的发生只有在待删除的节点的兄弟节点为黑，且子节点不全部为黑，才有可能借调到两个节点来做黑节点使用，从而保持整棵树都符合红黑树的定义。
 
- ![img](数据结构.assets/v2-a559407bb4847a140642d16c6301d7db_hd.png) 
+ ![img](http://klaus_project.gitee.io/pic/note/v2-a559407bb4847a140642d16c6301d7db_hd.png) 
 
 #### 删除操作的总结
 

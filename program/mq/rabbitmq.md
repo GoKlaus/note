@@ -102,7 +102,7 @@ RabbitMQ 是一个开源的 AMQP 实现，服务器端用Erlang语言编写，�
 
 通常我们谈到队列服务, 会有三个概念： 发消息者、队列、收消息者，RabbitMQ 在这个基本概念之上, 多做了一层抽象, 在发消息者和 队列之间, 加入了交换器 (Exchange). 这样发消息者和队列就没有直接联系, 转而变成发消息者把消息给交换器, 交换器根据调度策略再把消息再给队列。
 
-![](rabbitmq.assets/RabbitMQ01.png)
+![](http://klaus_project.gitee.io/pic/note/RabbitMQ01.png)
 
 - 左侧 P 代表 生产者，也就是往 RabbitMQ 发消息的程序。
 - 中间即是 RabbitMQ，*其中包括了 交换机 和 队列。*
@@ -129,7 +129,7 @@ RabbitMQ 是一个开源的 AMQP 实现，服务器端用Erlang语言编写，�
 ### Direct Exchange
 
 Direct Exchange 是 RabbitMQ 默认的交换机模式，也是最简单的模式，根据key全文匹配去寻找队列。
-![img](rabbitmq.assets/rabbitMq_direct.png)
+![img](http://klaus_project.gitee.io/pic/note/rabbitMq_direct.png)
 
 第一个 X - Q1 就有一个 binding key，名字为 orange； X - Q2 就有 2 个 binding key，名字为 black 和 green。*当消息中的 路由键 和 这个 binding key 对应上的时候，那么就知道了该消息去到哪一个队列中。*
 
@@ -268,13 +268,13 @@ rabbitmqctl.bat list_queues
 <!--这个jar包依赖，SLF4J和SLF4J Simple-->
 ```
 
-![image-20191120201700127](rabbitmq.assets/image-20191120201700127.png)
+![image-20191120201700127](http://klaus_project.gitee.io/pic/note/image-20191120201700127.png)
 
 
 
 ### Sending
 
-![](rabbitmq.assets/sending-1574252401839.png)
+![](http://klaus_project.gitee.io/pic/note/sending-1574252401839.png)
 
 publisher(sender)-->Send   发布/发送者
 
@@ -374,7 +374,7 @@ Why don't we use a try-with-resource statement to automatically close the channe
 
 工作队列（Working Queues）的作用是避免阻塞等待资源密集类任务的完成，转而放入队列异步处理。 将任务封装成一个消息并将其发送至队列中，运行在后台的work进程就会从队列中取出任务并最终执行它。可以使用多个work进程来分摊任务 
 
- ![img](rabbitmq.assets/python-two.png) 
+ ![img](http://klaus_project.gitee.io/pic/note/python-two.png) 
 
  这个概念适合web项目，一次HTTP请求时间有限，对于复杂处理业务的请求，很难保证响应时间 
 
@@ -456,7 +456,7 @@ tip:
 
 公平分发机制
 
- ![img](rabbitmq.assets/prefetch-count.png) 
+ ![img](http://klaus_project.gitee.io/pic/note/prefetch-count.png) 
 
 但消息分发有时候还是不能达到预期。比如在两个work的场景下，当所有奇数序号的消息均为重量级任务，而偶数序号的消息均为轻量级的，那么就会有一个队列非常繁忙，而另一个几乎什么都不做。RabbitMQ将不会知道这些，它还是会均匀地分发消息。
 
@@ -613,7 +613,7 @@ String queueName = channel.queueDeclare().getQueue();
 
 ## Bindings
 
- ![img](rabbitmq.assets/bindings.png) 
+ ![img](http://klaus_project.gitee.io/pic/note/bindings.png) 
 
  到此为止，已经创建了广播交换机和队列。下面需要告知交换机将消息发送给所有的队列。队列和交换机之间的这种关系叫做**绑定**。 
 
@@ -712,7 +712,7 @@ Direct交换机
 
  广播交换机不能提供复杂的特性，它仅能实现简单的广播机制。下面使用direct交换机来代替广播（fanout）交换机，direct交换机的路由算法相对简单：只有队列的绑定关键字和消息的路由关键字完全匹配时，消息才能够发送至队列。如下图的路由机制 
 
- ![img](rabbitmq.assets/direct-exchange.png) 
+ ![img](http://klaus_project.gitee.io/pic/note/direct-exchange.png) 
 
  可以看出在此路由机制下，有两个队列绑定在同一个direct类型的交换机上。第一个使用orange关键字进行绑定，第二个队列有两个绑定关键字，black和green。在此机制下，使用路由关键字orange发布的消息将会被发布至队列Q1，使用路由关键字black或green将会至Q2，其它所有的消息将会被丢弃。 
 
@@ -720,7 +720,7 @@ Direct交换机
 
 多重绑定
 
- ![img](rabbitmq.assets/direct-exchange-multiple.png) 
+ ![img](http://klaus_project.gitee.io/pic/note/direct-exchange-multiple.png) 
 
  多个队列使用相同的绑定关键字是非常合法的，在上图所示的例子中，在例子中，可以为Q1增加一个绑定关键字black绑定至交换机X。在这种情况下，direct交换机就像fanout交换机一样，将会广播消息至所有匹配的队列中。使用路由关键字black的消息将会传送至Q1和Q2。 
 
@@ -760,7 +760,7 @@ for(String severity : argv){
 
 代码整合
 
- ![img](rabbitmq.assets/python-four.png) 
+ ![img](http://klaus_project.gitee.io/pic/note/python-four.png) 
 
 ```java
 import com.rabbitmq.client.BuiltinExchangeType;
@@ -889,8 +889,8 @@ quick.orange.rabbit
 - \* (star) can substitute for exactly one word.
 - \# (hash) can substitute for zero or more words.
 
- ![img](rabbitmq.assets/python-five.png) 
- ![aaa](rabbitmq.assets/python-five.png "aaa")
+ ![img](http://klaus_project.gitee.io/pic/note/python-five.png) 
+ ![aaa](http://klaus_project.gitee.io/pic/note/python-five.png "aaa")
 
 一个消息以` quick.orange.rabbit `routing key 发送到Q1 Q2
 
