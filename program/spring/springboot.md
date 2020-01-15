@@ -107,6 +107,20 @@ prototype访问一次创建一个实例，相当于new。
 
 # 启动过程
 
+[SpringBoot启动结构图](https://www.processon.com/view/link/59812124e4b0de2518b32b6e)
+
+
+
+SpringBoot启动通过配置文件`classpath:META-INF/spring.factories`  key value 为全限定路径的类名，反射实例化对象，监听器监听相关时间启动
+
+
+
+
+
+
+
+
+
 ```
 A web application can define any number of DispatcherServlets.</b>
 * Each servlet will operate in its own namespace, loading its own application context
@@ -120,4 +134,8 @@ A web application can define any number of DispatcherServlets.</b>
 ```
 
 DispatcherServlet的注释
+
+
+
+
 
