@@ -51,6 +51,18 @@ isAlive()  检测线程是否处于活动状态（线程已经启动且尚未终
 
 
 
+## 线程的状态
+
+线程的状态5种
+
+**新建（new）、可运行（runable）、运行（running）、阻塞（blocked）、死亡（dead）**
+
+[线程的五种状态详解](https://blog.csdn.net/xingjing1226/article/details/81977129)
+
+![](http://dl.iteye.com/upload/picture/pic/116719/7e76cc17-0ad5-3ff3-954e-1f83463519d1.jpg)
+
+
+
 ## 暂停线程
 
 suspend() 
@@ -230,6 +242,8 @@ synchronized  两个特征：
 ```
 
 # 线程间的通信
+
+线程间通信模型有两种：共享内存和消息传递，实现线程间通信都是基于两种模型来实现的
 
 ```java
 --- 使用 wait/notify实现线程间的通信
