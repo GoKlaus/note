@@ -44,16 +44,16 @@
 
 
 
+### Purcell爬坑指南 ###
 
-# 插件 #
+怎么打开文件列表？
 
-## markdown-mode ##
+```
+C-x g 
+M-x dired
+```
 
-### 插入图片 ###
 
-### 插入链接 ###
-
-### 插入代码块 ###
 
 **参考**
 [Emacs Markdown 模式简介](https://linuxtoy.org/archives/emacs-markdown-mode.html)
