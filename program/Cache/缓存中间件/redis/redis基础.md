@@ -12,7 +12,7 @@
 
 
 
-![img]( http://klaus_project.gitee.io/pic/16e43d17b5ad429a)
+![img]( http://klaus_project.gitee.io/pic/note/16e43d17b5ad429a)
 
 **Redis**采用的是基于内存的采用的是单进程单线程模型的 KV 数据库，由C语言编写，官方提供的数据是可以达到100000+的**QPS（每秒内查询次数）**。
 
@@ -61,7 +61,7 @@ BloomFilter -- 布隆过滤器
 Bloom Filter跟单哈希函数Bit-Map不同之处在于：Bloom Filter使用了k个哈希函数，每个字符串跟k个bit对应。从而降低了冲突的概率
 
 
-![]( http://klaus_project.gitee.io/pic/BloomFilter.jpg)
+![]( http://klaus_project.gitee.io/pic/note/BloomFilter.jpg)
 
 
 
@@ -203,6 +203,10 @@ public String getByKey(String keyA,String keyB) {
 一样的数据，**AOF**文件比**RDB**还要大。
 
 **AOF**开启后，**Redis**支持写的**QPS**会比**RDB**支持写的要低，他不是每秒都要去异步刷新一次日志嘛**fsync**，当然即使这样性能还是很高，我记得**ElasticSearch**也是这样的，异步刷新缓存区的数据去持久化，为啥这么做呢，不直接来一条怼一条呢，那我会告诉你这样性能可能低到没办法用的，大家可以思考下为啥哟。
+
+
+
+
 
 
 
