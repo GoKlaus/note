@@ -12,9 +12,17 @@
 
 ### 1.Git设置
 
- 
+ [设置的意义](https://blog.csdn.net/xuewuzhijin2012/article/details/50117181)
+
+windows
 
 git config --global core.autocrlf false
+
+git config --global core.safecrlf true
+
+linux
+
+git config --global core.autocrlf input
 
 git config --global core.safecrlf true
 
