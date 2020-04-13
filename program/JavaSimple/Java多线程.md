@@ -63,6 +63,8 @@ isAlive()  检测线程是否处于活动状态（线程已经启动且尚未终
 
 
 
+![Java 线程的状态 ](/home/klaus/documents/pic/note/thread-1.png)
+
 ## 暂停线程
 
 suspend() 
