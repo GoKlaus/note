@@ -904,6 +904,52 @@ ValidatingSession
 
 
 
+# 实际问题
+
+springboot 新建测试类（junit），报错：
+
+```java
+org.apache.shiro.UnavailableSecurityManagerException: No SecurityManager
+```
+
+解决方案：
+
+参考：[springboot 新建测试类（junit），报错：org.apache.shiro.UnavailableSecurityManagerException: No SecurityManager](https://blog.csdn.net/yinzitun7947/article/details/100019769)
+
+```java
+package XXX;
+
+import org.apache.shiro.util.ThreadContext;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import javax.annotation.Resource;
+
+import static org.junit.Assert.*;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class ProjectFontControllerTest {
+    @Resource
+    org.apache.shiro.mgt.SecurityManager securityManager;
+    @Before
+    public void setUp() throws Exception {
+        ThreadContext.bind(securityManager);
+    }
+    @Autowired
+    ProjectService projectService;
+    @Test
+    public void addProject() {  //自动生成的方法名，也可自定义
+       //代码，非自动生成
+    }
+}
+
+```
+
 
 
 

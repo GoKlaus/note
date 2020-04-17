@@ -423,3 +423,40 @@ maven使用原型(archetype)概念为用户提供了大量不同类型的工程�
 
 * 根据模块的版本号(pom文件中的version)中是否带有-SNAPSHOT来判断是快照版本还是正式版本
 
+
+
+
+
+# 实际问题
+
+```bash
+清空：mvn clean
+编译：mvn compile
+打包：mvn package
+打包并安装到本地仓库: mvn install
+打包并部署到远程仓库: mvn deploy
+
+只打包不测试：mvn -Dtest package
+mvn -Dmaven.test.skip=true package
+snapshots包强制更新: mvn package -u
+
+传递参数：mvn package -DskipUserTest=true
+
+分析项目的依赖信息：mvn dependency:analyze 或 mvn dependency:tree
+
+清除eclipse系统设置:mvn eclipse:clean
+生成eclipse项目文件: mvn eclipse:eclipse
+
+清除idea系统设置:mvn idea:clean
+生成idea项目：mvn idea:idea
+
+离线打包: mvn package -o
+下载项目里所依赖的jar包的源码：mvn dependency:sources
+
+```
+
+
+
+[IDEA包不存在找不到包解决方案](https://blog.csdn.net/qq_37740982/article/details/95481599)
+
+在这个问题上浪费了一天，情况表现为项目可以编译通过

@@ -31,6 +31,12 @@ git remote update --purge
 
 
 
+```json
+{"code":1,"message":"demoData","returnData":{"image":"demoData","uuid":"demoData"}}
+```
+
+
+
 
 
 ### global
