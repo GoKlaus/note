@@ -212,6 +212,10 @@ Spring容器来实现对象的创建、协调工作
 
 
 
+**在`spring ioc`的过程中，优先解析`@Component，@Service，@Controller`注解的类。其次解析配置类，也就是`@Configuration`标注的类。最后开始解析配置类中定义的`bean`。** 
+
+
+
 # AOP
 
 AOP(Aspect Oriented Programming)面向切面编程，OOP(Object Oriented Programming)的补充和完善。
