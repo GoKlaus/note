@@ -6,9 +6,9 @@
 
 ## Spring流程
 
-![img](assets/1365825529_4693.png)
+![img](/home/klaus/documents/pic/note/1365825529_4693.png)
 
-![img](assets/1365825551_8302.png)
+![img](/home/klaus/documents/pic/note/1365825551_8302.png)
 
 ### Spring工作流程描述
 
@@ -31,7 +31,7 @@
 
 ### 包含的模块
 spring4
-![915fc56e425633a1759f6bca087ae50a.png](assets/20161227110029533-1552272732616.png)
+![915fc56e425633a1759f6bca087ae50a.png](/home/klaus/documents/pic/note/20161227110029533-1552272732616.png)
 
 ### spring分为5个部分
 >* core
@@ -43,7 +43,7 @@ spring4
 >图中每一个圆角矩形，都对应一个jar，其groupId都为"org.springframework"，每一个jar都有一个不同的artifactId，另外"instrumentation"和"Messageing"有两个jar，还有一个"spring-context-support"没有列出来，故spring的jar包总共20来个
 
 spring3
-![e727ba103e22ce34b416947ce02b90f3.png](assets/20161227105720710.png)
+![e727ba103e22ce34b416947ce02b90f3.png](/home/klaus/documents/pic/note/20161227105720710.png)
 
 >spring3 有19个jar
 ******
@@ -71,7 +71,7 @@ spring3
 ```
 `结果如下`
 
-![8d7c16e7610c9d31e2edfd1b14795374.png](assets/Image.png)
+![8d7c16e7610c9d31e2edfd1b14795374.png](/home/klaus/documents/pic/note/Image.png)
 `所以可以直接引入context包`
 
 
@@ -87,8 +87,8 @@ spring3
 >* spring-messaging：用于构建基于消息的应用程序
 
 `他们的依赖关系`
-![41c3268dbdea0f6c1cffaaadd17f8f78.png](assets/20161227105855947.png)
-![f61592c8c2b9f6e1dc28c0c95884b3d0.png](assets/20161227110103559.png)
+![41c3268dbdea0f6c1cffaaadd17f8f78.png](/home/klaus/documents/pic/note/20161227105855947.png)
+![f61592c8c2b9f6e1dc28c0c95884b3d0.png](/home/klaus/documents/pic/note/20161227110103559.png)
 
 
 
@@ -103,7 +103,7 @@ spring3
 
 
 `他们的依赖关系`
-![2d92c835c6f6f072fcf2b9415d69f3d8.png](assets/20161227105923275.png)
+![2d92c835c6f6f072fcf2b9415d69f3d8.png](/home/klaus/documents/pic/note/20161227105923275.png)
 
 ##### web
 >web包含4个模块
@@ -117,7 +117,7 @@ spring3
 
 `他们的依赖关系`
 
-![70ebd99c32d0cba94636eb3e957e9011.png](assets/20161227105944604.png)![f61592c8c2b9f6e1dc28c0c95884b3d0.png](assets/20161227110103559-1552272914280.png)
+![70ebd99c32d0cba94636eb3e957e9011.png](/home/klaus/documents/pic/note/20161227105944604.png)![f61592c8c2b9f6e1dc28c0c95884b3d0.png](/home/klaus/documents/pic/note/20161227110103559-1552272914280.png)
 
 
 ##### test和spring-context-support
@@ -125,7 +125,7 @@ spring3
 >* spring-test：spring测试，提供junit和mock的功能测试
 >* spring-context-support：spring的额外支持包，比如邮件服务，视图解析等
 >  `他们的依赖关系`
->  ![c63fee268ee45f57beb804ba8a93f1cf.png](assets/20161227110008855.png)
+>  ![c63fee268ee45f57beb804ba8a93f1cf.png](/home/klaus/documents/pic/note/20161227110008855.png)
 
 
 
@@ -148,9 +148,9 @@ spring3
    c、容器将context-param转换成键值对，交给ServletContext
    d、接着按照上述顺序继续执行
 
-![img](assets/16787cb36ca9e2dd)
+![img](/home/klaus/documents/pic/note/16787cb36ca9e2dd)
 
-![img](assets/1678bc7b61df1c4f)
+![img](/home/klaus/documents/pic/note/1678bc7b61df1c4f)
 
 **加载顺序** 
 a、首先加载Spring容器加载器：ContextLoaderListener
@@ -209,6 +209,21 @@ c、加载Servlet：初始化DispatcherServlet，在SpringMVC架构中，Dispatc
 # IOC
 
 Spring容器来实现对象的创建、协调工作
+
+![启动流程](/home/klaus/documents/pic/note/20190310122523469.png)
+
+![在这里插入图片描述](/home/klaus/documents/pic/note/20190310121611901.png)
+
+
+
+简单分类如下：
+
+- 工厂后置处理器（BeanFactoryPostProcessor）：这个包括了AspectJWeavingEnabler, ConfigurationClassPostProcessor, CustomAutowireConfigurer等等非常有用的工厂后处理器接口的方法。工厂后处理器也是容器级的。
+- 容器级别生命周期处理器：包括了InstantiationAwareBeanPostProcessor 和 BeanPostProcessor 这两个接口实现，一般称它们的实现类为“后处理器”
+- Bean级生命周期接口方法（仅作用于某个Bean）：这个包括了BeanNameAware、BeanFactoryAware、InitializingBean和DiposableBean这些接口的方法
+- Bean自身的方法：这个包括了Bean本身调用的方法和通过配置文件中<bean>的init-method和destroy-method指定的方法
+
+
 
 
 

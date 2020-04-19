@@ -106,7 +106,7 @@ Btree是按照从左到右的顺序来建立搜索树的。比如索引是(name,
 
 
 
-## 事务
+# 事务
 
 
 
@@ -120,7 +120,7 @@ Btree是按照从左到右的顺序来建立搜索树的。比如索引是(name,
 transaction-isolation = {READ-UNCOMMITTED | READ-COMMITTED | REPEATABLE-READ | SERIALIZABLE}
 ```
 
-### ACID
+## ACID
 
 - 原子性  一个事务必须被视为一个不可分割的最小工作单元，整个事务中的所有操作要么全部提交成功，要么全部失败回滚，对于一个事务来说，不可能只执行其中的一部分操作，这就是事务的原子性
 - 一致性   数据库总是从一个一致性的状态转换到另一个一致性的状态(数据处于一种语义上的有意义且正确的状态。一致性是对数据可见性的约束，保证在一个事务中的多次操作的数据中间状态对其他事务不可见的。因为这些中间状态，是一个过渡状态，与事务的开始状态和事务的结束状态是不一致的)。
@@ -129,7 +129,7 @@ transaction-isolation = {READ-UNCOMMITTED | READ-COMMITTED | REPEATABLE-READ | S
 
 隔离性涉及到隔离级别的概念，在不同的隔离级别下，会有不同的表现形式
 
-#### 隔离级别
+## 隔离级别
 
 先熟悉这几个概念：
 
@@ -167,35 +167,59 @@ transaction-isolation = {READ-UNCOMMITTED | READ-COMMITTED | REPEATABLE-READ | S
 
 
 
-## 锁 ##
+# 锁 #
 
 锁包括：全局锁、表锁、行锁、死锁、乐观锁、悲观锁等，不同的数据库引擎支持的锁支持粒度也是不同的
 
-## 日志
+# 日志
 
 
 
 
 
-## Mysql操作命令和内置函数
+# Mysql操作命令和内置函数
+
+## 内置函数
+
+### find_in_set
+
+和 in 功能相似，in 适合常量，find_in_set适合函数
+
+like是广泛的模糊查询，而 find_in_set() 是精确匹配，并且字段值之间用‘,'分开
 
 
 
+### concat
 
-
-## 性能优化和分布式
-
-
-
-## 常见参数设置
+将多个字符串连接成一个字符串
 
 
 
-## 存储引擎如何选择
+### concat_ws
+
+和concat()一样，将多个字符串连接成一个字符串，但是可以一次性指定分隔符～（concat_ws就是concat with separator）
+
+==把分隔符指定为null，结果全部变成了null==
+
+
+
+### group_concat
+
+
+
+# 性能优化和分布式
+
+
+
+# 常见参数设置
+
+
+
+# 存储引擎如何选择
 
 存储引擎种类
 
-### InnoDB
+## InnoDB
 
 InnoDB是MySQL默认的事务型引擎，也是最重要、最广泛的存储引擎。它的设计是用来处理大量短期事务，短期事务大部分是正常提交的，很少回滚。InnoDB的性能和自动崩溃恢复特性，使得它在非事务型存储的需求中，也很流行。除了非常特别的原因需要使用其他引擎，InnoDB也是非常好值得花时间研究的对象。
 
@@ -203,7 +227,7 @@ InnoDB的数据存储在表空间中，表空间是由InnoDB管理的黑盒文�
 
 InnoDB通过间隙锁（next-key locking）防止幻读的出现。InnoDB是基于聚簇索引建立，与其他存储引擎有很大的区别，聚簇索引对主键查询有很高的性能，不过它的二级索引（secondary index，非主键索引）必须包含主键列。所以如果主键列很大的话，索引会很大。
 
-### MyISAM
+## MyISAM
 
 在5.1之前，MyISAM是默认的引擎，MyISAM有大量的特心态，包括全文索引、压缩、空间函数。但是MyISAM不支持事务和行级锁，而且在崩溃后无法安全恢复。即使后续版本中MyISAM支持了事务，但是很多人的概念中依然是不支持事务的引擎。
 
@@ -231,25 +255,25 @@ MyISAM另一个特性是支持压缩表。如果数据在写入后不会修改�
 
 MySQL还有一些其他特殊用途的引擎，有些可能不再支持，具体支持情况参考数据库支持引擎。
 
-### Archive
+## Archive
 
 Archive引擎支持是Insert，Select操作，现在支持索引，Archive引擎会缓存所有的写，并利用zlib对写入行进行压缩，所以比MyISAM表的磁盘IO更少。但是在每次Select查询都需要执行全表扫描。所以在Archive适合日志和数据采集应用。这类应用在分析时往往需要全表扫描忙活着更快的Insert操作场景中也可以使用。
 
 Archive引擎支持行级锁和专用的缓存区，所以可以实现高并发写入，在查询开始到返回表存在的所有行数之前，Archive会阻止其他Select执行，用来实现一致性读。另外也实现了批量写入结束前批量写入数据对读操作不可见，这种机制模仿了事务和MVCC的特性，但是Archive不是一个事务型引擎，而是针对高写入压缩做了优化的简单引擎。
 
-### Blackhole
+## Blackhole
 
 Blackhole没有实现任何存储机制，它会舍弃所有写入数据，不做任何保存，但是服务器会记录Blackhole表的日志，用于复制数据到备库，或者只是简单的记录到日志，这种特殊的存储引擎可以在一些特俗的复制架构和日志审核时发挥作用。但是不推荐。
 
-### CSV
+## CSV
 
 CSV引擎可以将普通的CSV文件作为MySQL表来处理，但是这种表不支持索引，CSV可以在数据库运行时拷贝或者拷出文件，可以将Excel等电子表格中的数据存储未CSV文件，然后复制到MySQL中，就能在MySQL中打开使用。同样，如果将数据写入到一个CSV引擎表，其他外部程序也可以从表的数据文件中读取CSV的数据。因此CSV可以作为数据交换机制。非常好用。
 
-### Federated
+## Federated
 
 Federated引擎是访问其他MySQL服务器的一个代理，它会创建一个到远程MySQL服务器的客户端连接，并将查询传输到远程服务器执行，然后提取或者发送需要的数据。最初设计该存储引擎是为了和企业级数据库如MicrosoftSQLServer和Oracle的类似特性竞争的，可以说更多的是一种市场行为。尽管该引擎看起来提供了一种很好的跨服务器的灵活性，但也经常带来问题，因此默认是禁用的。
 
-### Memroy
+## Memroy
 
 heap
 
@@ -263,11 +287,11 @@ Memroy表在很多场景可以发挥好的作用：
 
 Memory表支持Hash索引，因此查找操作非常快。虽然Memory表的速度非常快，但还是无法取代传统的基于磁盘的表。Memroy表是表级锁，因此并发写入的性能较低。它不支持BLOB或TEXT类型的列，并且每行的长度是固定的，所以即使指定了VARCHAR列，实际存储时也会转换成CHAR，这可能导致部分内存的浪费。如果MySQL在执行查询的过程中需要使用临时表来保存中间结果，内部使用的临时表就是Memory表。如果中间结果太大超出了Memory表的限制，或者含有BLOB或TEXT字段，则临时表会转换成MyISAM表。
 
-### Merge
+## Merge
 
 Merge引擎是MyISAM引擎的一个变种。Merge表是由多个MyISAM表合并而来的虚拟表。如果将MySQL用于日志或者数据仓库类应用，该引擎可以发挥作用。但是引入分区功能后，该引擎已经被放弃
 
-### NDB 集群 引擎
+## NDB 集群 引擎
 
 NDB集群存储引擎，作为SQL和NDB原生协议之间的接口。MySQL服务器、NDB集群存储引擎，以及分布式的、share-nothing的、容灾的、高可用的NDB数据库的组合，被称为MySQL集群（MySQLCluster）。
 
@@ -275,7 +299,7 @@ NDB集群存储引擎，作为SQL和NDB原生协议之间的接口。MySQL服务
 
 **特殊**
 
-### PERFORMANCE_SCHEMA
+## PERFORMANCE_SCHEMA
 
 MySQL 5.5新增一个存储引擎：命名**PERFORMANCE_SCHEMA** ,主要用于收集数据库服务器性能参数。MySQL用户是不能创建存储引擎为PERFORMANCE_SCHEMA的表。
 
@@ -293,7 +317,7 @@ SHOW VARIABLES LIKE 'performance_schema';
 
 
 
-### 常见问题：
+## 常见问题：
 
 场景适用选择？
 
@@ -325,9 +349,180 @@ sql优化
 
 
 
+
+
+
+
+
+
 ## 主键生成策略
 
 uuid
+
+
+
+# 自定义函数
+
+
+
+## 树结构的查询
+
+这是sql server 写法，mysql 里没有with as 用法
+
+查询一个节点的所有后代（查子树）
+
+```sql
+with temp(obj_id, parent_id, other_data, t_level)
+as
+(
+	select obj_id, parent_id, other_data, 0 as t_level from t_obj
+    where parent_id = ''
+    union all --递归语句
+    select c.obj_id, c.parent_id, c.other_data, ce.t_level + 1 from t_obj as c 
+    inner join temp as ce 
+    on c.parent_id = ce.obj_id
+)
+select * from temp;
+```
+
+
+
+查询祖先节点
+
+```sql
+with temp(obj_id, parent_id, other_data, t_level)
+as 
+(
+	select obj_id, parent_id, other_data, 0 as t_level from t_obj
+	where parent_id = ''
+	union all --递归语句
+	select c.obj_id, c.parent_id, c.other_data, ce.t_level - 1 from t_obj as c
+	inner join temp as ce
+    on ce.parent_id = c.obj_id
+    where ce.obj_id <> c.parent_id
+)
+select * from temp order by obj_id asc;
+```
+
+
+
+mysql
+
+## 向下递归
+
+**利用find_in_set()函数和group_concat()函数实现递归查询：**
+
+```sql
+DROP FUNCTION IF EXISTS queryChildrenAreaInfo;
+DELIMITER ;;
+CREATE FUNCTION queryChildrenAreaInfo(areaId bigint)
+RETURNS VARCHAR(4000)
+BEGIN
+DECLARE sTemp VARCHAR(4000);
+DECLARE sTempChd VARCHAR(4000);
+
+SET sTemp='$';
+SET sTempChd = CAST(areaId AS CHAR);
+
+WHILE sTempChd IS NOT NULL DO
+SET sTemp= CONCAT(sTemp,',',sTempChd);
+SELECT GROUP_CONCAT(id) INTO sTempChd FROM t_areainfo WHERE FIND_IN_SET(parentId,sTempChd)>0;
+END WHILE;
+RETURN sTemp;
+END
+;;
+DELIMITER ;
+
+-- 调用方式
+select * from t_area where find_in_set(area_id, queryChildrenAreaInfo(1));
+```
+
+
+
+## 向上递归
+
+```sql
+DROP FUNCTION IF EXISTS queryChildrenAreaInfo1;
+DELIMITER;;
+CREATE FUNCTION queryChildrenAreaInfo1(areaId INT)
+RETURNS VARCHAR(4000)
+BEGIN
+DECLARE sTemp VARCHAR(4000);
+DECLARE sTempChd VARCHAR(4000);
+
+SET sTemp='$';
+SET sTempChd = CAST(areaId AS CHAR);
+SET sTemp = CONCAT(sTemp,',',sTempChd);
+
+SELECT parentId INTO sTempChd FROM t_areainfo WHERE id = sTempChd;
+WHILE sTempChd <> 0 DO
+SET sTemp = CONCAT(sTemp,',',sTempChd);
+SELECT parentId INTO sTempChd FROM t_areainfo WHERE id = sTempChd;
+END WHILE;
+RETURN sTemp;
+END
+;;
+DELIMITER ;
+```
+
+
+
+# value 和 values
+
+
+
+# 临时表
+
+特点：
+
+- 生命周期：会话， 临时表只在当前连接可见，当关闭连接时，Mysql会自动删除表并释放所有空间
+- 在会话中可以使用drop table 来销毁
+- 3.23版本之后才有
+
+example
+
+```sql
+mysql> CREATE TEMPORARY TABLE SalesSummary (
+    -> product_name VARCHAR(50) NOT NULL
+    -> , total_sales DECIMAL(12,2) NOT NULL DEFAULT 0.00
+    -> , avg_unit_price DECIMAL(7,2) NOT NULL DEFAULT 0.00
+    -> , total_units_sold INT UNSIGNED NOT NULL DEFAULT 0
+);
+
+
+
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> INSERT INTO SalesSummary
+    -> (product_name, total_sales, avg_unit_price, total_units_sold)
+    -> VALUES
+    -> ('cucumber', 100.25, 90, 2);
+
+mysql> SELECT * FROM SalesSummary;
++--------------+-------------+----------------+------------------+
+| product_name | total_sales | avg_unit_price | total_units_sold |
++--------------+-------------+----------------+------------------+
+| cucumber     |      100.25 |          90.00 |                2 |
++--------------+-------------+----------------+------------------+
+1 row in set (0.00 sec)
+mysql> DROP TABLE SalesSummary;
+mysql>  SELECT * FROM SalesSummary;
+ERROR 1146: Table 'RUNOOB.SalesSummary' doesn't exist
+```
+
+用查询直接创建临时表的方式
+
+```sql
+CREATE TEMPORARY TABLE 临时表名 AS
+(
+    SELECT *  FROM 旧的表名
+    LIMIT 0,10000
+);
+```
+
+
+
+
 
 
 
