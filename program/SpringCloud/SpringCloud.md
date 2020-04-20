@@ -2,6 +2,8 @@
 
 概念：
 
+提springcloud 就离不开微服务的概念
+
 Iaas：
 
 Infrastructure as a Service  基础设施即服务
@@ -23,21 +25,17 @@ Caas：
 - 轻量级的组件。springcloud的组件大都比较轻量，例如Eureka、Zuul等都是各自领域轻量级的实现
 - 组件丰富，功能齐全。springcloud为微服务架构提供了非常完整的支持。例如，配置管理，服务发现，断路器，微服务网关等
 - 选型中立、丰富。例如，springcloud支持使用Eureka、Zookeeper或Consul实现服务发现
-- 灵活。springcloud的组成部分是解耦的，开发人员可以按需求灵活挑选技术选型```xml
-<dependency>
-    <groupId>org.springframework.cloud</groupId>
-    <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
-</dependency>
+- 灵活。springcloud的组成部分是解耦的，开发人员可以按需求灵活挑选技术选型
+
+
+
+
 
 <dependency>
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-netflix-eureka-server</artifactId>
 </dependency>
 <!--使用这两个依赖不同，第一个依赖可以直接自动注入配置，第二个不行-->
-
-```
-
-```
 
 
 
