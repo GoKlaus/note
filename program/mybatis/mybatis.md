@@ -34,3 +34,14 @@
 jar包中的mapper.xml文件加载
 
 用 classpath 和 classpath*的区别来完成
+
+
+
+if test 判断list 是否空
+
+```xml
+<!-- -->
+<if test="list!=null and list.size()!=0">
+</if>
+```
+
