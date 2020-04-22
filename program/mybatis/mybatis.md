@@ -26,3 +26,11 @@
 ```
 
 ## 2.2
+
+
+
+# 实际遇到问题
+
+jar包中的mapper.xml文件加载
+
+用 classpath 和 classpath*的区别来完成

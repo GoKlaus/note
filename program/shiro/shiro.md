@@ -219,6 +219,8 @@ SecurityManager接口继承了Authenticator，另外还有一个ModularRealmAuth
 
 ==FirstSuccessfulStrategy==：只要有一个Realm验证成功即可，只返回第一个Realm身份验证成功的认证信息，其他的忽略；
 
+FirstExceptionStrategy：
+
 ==AtLeastOneSuccessfulStrategy==：只要有一个Realm验证成功即可，和FirstSuccessfulStrategy不同，返回所有Realm身份验证成功的认证信息；
 
 ==AllSuccessfulStrategy==：所有Realm验证成功才算成功，且返回所有Realm身份验证成功的认证信息，如果有一个失败就失败了。

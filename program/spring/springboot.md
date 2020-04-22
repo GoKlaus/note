@@ -115,6 +115,14 @@ SpringBoot启动通过配置文件`classpath:META-INF/spring.factories`  key val
 
 
 
+```json
+{"orgId":1,"roleId":1,"username":"demoData","password":"demoData","email":"demoData","mobile":"demoData"}
+```
+
+
+
+
+
 
 
 
