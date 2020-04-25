@@ -1,3 +1,5 @@
+[TOC]
+
 ## 通用
 
 ### CURD
@@ -592,7 +594,25 @@ CREATE TEMPORARY TABLE 临时表名 AS
 
 
 
+## 一张表查出数据插入另一张表
 
+```sql
+insert into A(a,b,c)(select a,b,c from B);
+```
+
+实例
+
+```sql
+set @a := 0;
+insert into sys_role_access(`id`, role_id, access_id, create_user_id, modify_user_id)(select @a := @a + 1 as `id`, 1 as role_id, id as access_id, 1 as `create_user_id`, 1 as `modify_user_id` from sys_access);
+```
+
+
+
+```sql
+INSERT INTO smart_community.sys_user (id, username, real_name, email, mobile, password, salt, create_user_id, org_id, exp_time, gmt_create, gmt_modified, remark, status) VALUES (1, 'admin', '', '', '13090872505', 'cd538bb11c60a1bb6357f8bd44e415e6', 'admin', 0, 1735478428356783, null, '2020-04-22 11:04:41', '2020-04-22 11:04:41', '', 1);
+INSERT INTO smart_community.sys_user (id, username, real_name, email, mobile, password, salt, create_user_id, org_id, exp_time, gmt_create, gmt_modified, remark, status) VALUES (1253247600705323010, 'test', '', '', '13090972545', '6e4b266b2a0fbaa2c08d61bdefe7ee48', 'test', 0, 1, null, '2020-04-23 17:01:27', '2020-04-23 17:01:27', '', 1);
+```
 
 
 
