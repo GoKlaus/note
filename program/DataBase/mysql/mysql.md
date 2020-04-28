@@ -24,17 +24,51 @@
 
 MySQL中基本索引类型，没有什么限制，允许在定义索引的列中插入重复值和空值，纯粹为了查询数据更快一点
 
+如何建立
+
+```sql
+--建表语句
+CREATE TABLE `sys_area`
+(    `id`             bigint(20)  NOT NULL,
+    `name`           varchar(50) NOT NULL COMMENT '区域名',
+    `parent_id`      bigint(20)  NULL COMMENT '上级区域id',
+    `org_id`         bigint(20)  NOT NULL COMMENT '组织id',
+    `create_user_id` bigint(20)  NOT NULL COMMENT '创建者id',
+    `gmt_create`     timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `gmt_modified`   timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `remark`         varchar(40) NOT NULL DEFAULT '' COMMENT '备注',
+    `status`         tinyint(2)  NOT NULL DEFAULT 1 COMMENT '状态  0：禁用   1：正常',
+    PRIMARY KEY (`id`),
+    INDEX `idx_org` (`org_id`),
+    INDEX `name` (`name`),
+    INDEX `idx_org_name_parent` (`parent_id`)
+)ENGINE = InnoDB
+ DEFAULT CHARACTER SET = utf8 COMMENT = '区域表';
+```
+
 
 
 #### 唯一索引 UNIQUE
 
 索引列中的值必须是唯一的，但是允许为空值
 
+如何建立
+
+```sql
+
+```
+
 
 
 #### **主键索引， PRIMARY KEY**
 
 是一种特殊的唯一索引，不允许有空值　　
+
+如何建立
+
+```sql
+
+```
 
 
 
@@ -104,15 +138,15 @@ Btree是按照从左到右的顺序来建立搜索树的。比如索引是(name,
 
 
 
-## 索引注意事项
+# 索引注意事项
 
 1、如果条件中有or，即使其中有条件带索引也不会使用(这也是为什么尽量少用or的原因)
 
  注意：要想使用or，又想让索引生效，只能将or条件中的每个列都加上索引
 
-2.对于多列索引，不是使用的第一部分，则不会使用索引
+2.对于多列索引，不是使用的第一部分，则不会使用索引（最左匹配原则）
 
-3.like查询是以%开头
+3.like查询是以%开头，会全表扫描
 
 4.如果列类型是字符串，那一定要在条件中将数据使用引号引用起来,否则不使用索引
 
@@ -165,6 +199,202 @@ handler_read_rnd_next:这个值越高，说明查询低效
 21,联合索引 is not null 只要在建立的索引列（不分先后）都会走, in null时 必须要和建立索引第一列一起使用,当建立索引第一位置条件是is null 时,其他建立索引的列可以是is null（但必须在所有列 都满足is null的时候）,或者=一个值； 当建立索引的第一位置是=一个值时,其他索引列可以是任何情况（包括is null =一个值）,以上两种情况索引都会走。其他情况不会走。
 
 在字段not null的情况下，is null和is not null都不会走索引
+
+## 如何强制使用索引？
+
+代码中使用
+
+```sql
+select * from oa_attend oa
+FORCE index(i_oa_create_time)
+where oa.create_time >= '2018-10-01 00:00:00' and oa.create_time<='2018-11-14 00:00:00';
+ 
+select * from oa_attend oa 
+FORCE index(i_oa_create_time)
+where oa.create_time BETWEEN '2018-10-01 00:00:00' and '2018-11-14 00:00:00';
+```
+
+## KEY与INDEX 含义讲解
+
+[MySql常见约束](https://www.cnblogs.com/fanqisoft/p/10697866.html)
+
+
+
+约束：一种限制，用于限制表中数据，为了保证表中数据的准确性和可靠性
+
+种类：
+
+1. NOT NULL ：非空，用于保证字段非空
+2. DEFAULT：默认值，用于保证字段的默认值
+3. PRIMARY KEY：主键，用于保证该字段具有唯一性并且非空
+4. UNIQUE：唯一，用于保证该字段的值具有唯一性
+5. CHECK：检查约束（MYSQL不支持），检查字段的值是否为指定的值
+6. FOREIGN KEY：外键，用于限制两个表的关系，用于保证该字段的值必须来自于主表的关联列的值，在从表添加外键约束，用于引用主表中某些值
+
+如何添加约束：
+
+1、列级约束（六大约束都支持，但是外键约束没有效果）
+
+```sql
+create table if not exists t_stuinfo(
+    id int primary key,    #主键
+    stuName varchar(20) not null,    #非空
+    gender char(1) check(gender='男' or gender='女'),    #检查约束，MySql没有效果但不报错
+    seat int unique,    #唯一约束
+    age int default 18,    #默认（值）约束
+    majorId int references major(id) #外键约束，MySql没有效果，但不报错
+    );
+```
+
+2、表级约束（除了非空、默认，其他都支持）
+
+语法 在创建字段语句下面
+
+```sql
+constraint 约束名 约束类型(字段名)
+```
+
+
+
+```sql
+create table if not exists t_stuinfo(
+    id int,
+    stuName varchar(20),
+    gender char(1),
+    seat int,
+    age int,
+    majorId int,
+    constraint pk primary key(id),    #约束名随意，主键不生效，但不报错。
+    constraint uq unique(seat),    #唯一约束
+    constraint ck check(gender='男' or gender='女'),    #检查约束，MySql不支持此约束，不报错但不生效
+    constraint fk_stuinfo_major foreign key(majorId) references major(id)    #外键约束
+    );
+```
+
+ 主键和唯一的区别
+
+| 约束名称 | 保证唯一性 | 是否允许为空 | 一个表中可以有多少个 | 是否允许组合 |
+| -------- | ---------- | ------------ | -------------------- | ------------ |
+| 主键     | √          | ×            | 最多有1个，可以没有  | √（不推荐）  |
+| 唯一     | √          | √            | 可以有多个           | √（不推荐）  |
+
+外键：
+
+　　1.要求在从表中设置外键关系
+
+　　2.从表的外键列的类型和主表的关联列的类型要求一致或兼容，名称无要求。
+
+　　3.主表的关联列必须时一个Key（一般为主键或唯一，外键也可以但无意义）
+
+　　4.插入数据时，先插入主表，再插入从表
+
+　　  删除数据时，先删除从表，再删除主表
+
+### 标识列
+
+又为自增长列，可以不用手动的插入值，系统提供默认的序列值
+
+特点：
+
+1. 标识列必须和一个Key搭配（Key指主键、唯一、外键....）
+2. 一个表最多有一个标识列
+3. 标识列的类型只能是数值型
+4. 标识列可以通过SET auto_increment_increment = 3;设置步长（全局），可以通过插入行时手动插入标识列值设置起始值。
+
+1.创建表时设置标识列
+
+```sql
+1 create table user(
+2     id int primary key auto_increment,
+3     name varchar(20)
+4     );
+```
+
+　　2.修改表时设置标识列
+
+```sql
+1     alter table 表名称 modify column id int primary key auto_increment;
+```
+
+　　3.修改表时删除标识列
+
+```sql
+1 alter table 表名称 modify column id int primary key;
+```
+
+### KEY 和 INDEX比较
+
+单独KEY 和其他关键字结合的KEY(primary key)是不同的
+
+如果只是key的话，就是普通索引
+
+```sql
+DROP TABLE IF EXISTS `community_staff_trace`;
+CREATE TABLE `community_staff_trace`
+(
+    `id`             bigint(20) NOT NULL AUTO_INCREMENT,
+    `staff_id`       varchar(50)         DEFAULT NULL COMMENT '智慧小镇人员id',
+    `standard_image` varchar(255)        DEFAULT NULL COMMENT '底库照片',
+    `snap_image`     varchar(255)        DEFAULT NULL COMMENT '抓拍照片',
+    `org_id`         varchar(10)         DEFAULT NULL COMMENT '公司id',
+    `area_id`        varchar(20)         DEFAULT NULL COMMENT '抓拍区域id',
+    `device_id`      varchar(20)         DEFAULT NULL COMMENT '设备id',
+    `is_alarm`       varchar(1)          DEFAULT NULL COMMENT '告警状态1:正常 0:异常',
+    `similarity`     varchar(20)         DEFAULT NULL COMMENT '相似度',
+    `plat_record_id` varchar(50)         DEFAULT NULL COMMENT '老火瞳平台刷脸记录id',
+    `snap_time`      timestamp  NULL     DEFAULT NULL COMMENT '抓拍时间',
+    `create_time`    timestamp  NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY `staff_id` (`staff_id`) USING BTREE COMMENT '人员id',
+    KEY `area_id` (`area_id`) USING BTREE COMMENT '区域id'
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 2
+  DEFAULT CHARSET = utf8
+  ROW_FORMAT = COMPACT COMMENT ='人员轨迹表';
+```
+
+
+
+==key 是数据库的物理结构==，包含两层含义：
+
+1. 约束（偏重于约束和规范数据库的结构完整性）
+2. 索引（辅助查询）
+
+
+
+**primary key**
+
+> 1. 约束作用（constraint），用来规范一个存储主键和唯一性
+> 2. 也在此key上建立了一个主键索引
+
+**unique key**
+
+>1. 约束作用（constraint），规范数据的唯一性
+>2. key上建立了一个唯一索引
+
+**foreign key**
+
+>1. 约束作用（constraint），规范数据的引用完整性
+>2. key上建立了一个index
+
+
+
+mysql的key是同时具有constraint和index的意义，这点和其他数据库表现的可能有区别。
+
+（至少在oracle上建立外键，不会自动建立index），因此创建key也有如下几种方式：
+（1）在字段级以key方式建立， 如 create table t (id int not null primary key);
+（2）在表级以constraint方式建立，如create table t(id int, CONSTRAINT pk_t_id PRIMARY key (id));
+（3）在表级以key方式建立，如create table t(id int, primary key (id));
+
+
+
+index 也是数据库的物理结构，用于辅助查询，意义没有key 丰富(primary key ，unique key etc..)创建时会在另外的表空间（mysql中的innodb表空间）以一个类似目录的结构存储
+
+区别在于：
+
+***\*不会去约束索引的字段的行为\****（那是key要做的事情）
+
+
 
 
 
@@ -609,10 +839,17 @@ insert into sys_role_access(`id`, role_id, access_id, create_user_id, modify_use
 
 
 
-```sql
-INSERT INTO smart_community.sys_user (id, username, real_name, email, mobile, password, salt, create_user_id, org_id, exp_time, gmt_create, gmt_modified, remark, status) VALUES (1, 'admin', '', '', '13090872505', 'cd538bb11c60a1bb6357f8bd44e415e6', 'admin', 0, 1735478428356783, null, '2020-04-22 11:04:41', '2020-04-22 11:04:41', '', 1);
-INSERT INTO smart_community.sys_user (id, username, real_name, email, mobile, password, salt, create_user_id, org_id, exp_time, gmt_create, gmt_modified, remark, status) VALUES (1253247600705323010, 'test', '', '', '13090972545', '6e4b266b2a0fbaa2c08d61bdefe7ee48', 'test', 0, 1, null, '2020-04-23 17:01:27', '2020-04-23 17:01:27', '', 1);
-```
+# 
+
+
+
+# sql优化措施
+
+1. 对查询进行优化，应尽量避免全表扫描，首先应考虑在 where 及 order by 涉及的列上建立索引。注意：要想使用or，又想让索引生效，只能将or条件中的每个列都加上索引
+2. 应尽量避免在 where 子句中使用!=或<>（不等于）操作符，否则将引擎放弃使用索引而进行全表扫描。
+3. 应尽量避免在 where 子句中对字段进行 null 值判断，否则将导致引擎放弃使用索引而进行全表扫描。可以设置默认值，避免使用null
+4. 左模糊查询"%--"是无法使用索引的，右模糊会走索引
+5. 
 
 
 

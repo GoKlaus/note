@@ -1,5 +1,15 @@
 [TOC]
 
+
+
+# 线程安全的定义
+
+当多个线程同时访问一个对象时，如果不用考虑这些线程在运行时环境下的调度和交替执行，也不需要进行额外的同步，或者在调用方进行任何其他的协调操作，调用这个对象的行为都可以获得正确的结果，那就称这个对象是线程安全的
+
+----- `Brian Goetz 《Java并发编程实战（Java Concurrency In Practice）》`
+
+
+
 # Java的多线程技能
 
 不共享数据，每个线程内有自己的变量数据，其他线程不可见
@@ -112,6 +122,18 @@ Java中有两种线程：
 
 sychronized方法是对当前对象进行加锁，synchronized代码块是对某一个对象进行加锁
 
+## synchronized底层原理
+
+synchronized编译后会生成：
+
+`monitorenter` 和 `monitorexit` 两条指令
+
+`monitorenter`的作用
+
+1. 
+
+
+
 
 
 ### 将任意对象作为对象监视器
@@ -139,7 +161,7 @@ sychronized方法是对当前对象进行加锁，synchronized代码块是对某
 
 
 
-不是使用String作为对象监视器，因为jre常量池的原因
+不使用String作为对象监视器，因为`jre`常量池的原因
 
 
 
