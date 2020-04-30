@@ -147,5 +147,84 @@ DispatcherServlet的注释
 
 
 
+# 实际遇到问题
+
+## zuul网关转发请求头
+
+```java
+package com.chinamobile.iot.client;
+
+import com.chinamobile.iot.east.common.util.constants.ErrorEnum;
+import com.chinamobile.iot.east.common.web.CommonUtil;
+import com.chinamobile.iot.east.common.web.response.CommonResponse;
+import feign.RequestInterceptor;
+import feign.RequestTemplate;
+import feign.hystrix.FallbackFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
+
+/**
+ * description:
+ *
+ * @author klaus
+ * @date 2020/4/26
+ */
+//smartCommunity-user 从eureka中找这个名字的项目
+@FeignClient(value = "smartCommunity-user", configuration = AuthorizorClientFallBack.class)
+public interface AuthorizorClient {
+
+    @PostMapping("/sys/user/new/tokenAuth")
+    CommonResponse authorizeByToken(@RequestParam("path") String path);
+
+}
+
+@Component
+class AuthorizorClientFallBack implements FallbackFactory<AuthorizorClient>, RequestInterceptor {
+//实现RequestInterceptor 来转发header
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizorClientFallBack.class);
+
+    @Override
+    public AuthorizorClient create(Throwable throwable) {
+        return new AuthorizorClient() {
+            @Override
+            public CommonResponse authorizeByToken(String path) {
+                LOGGER.info("token auth failed, cause by {} ", throwable.getMessage());
+                // TODO: 2020/4/26  增加对返回值类型来决定后续返回
+                return (CommonResponse) CommonUtil.errorJson(ErrorEnum.E_50502);
+            }
+        };
+    }
+
+    //转发请求中带有的header
+    @Override
+    public void apply(RequestTemplate template) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
+                .getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        Enumeration<String> headerNames = request.getHeaderNames();
+        if (headerNames != null) {
+            while (headerNames.hasMoreElements()) {
+                String name = headerNames.nextElement();
+                String values = request.getHeader(name);
+                template.header(name, values);
+            }
+            LOGGER.debug("feign interceptor header:{}", template.toString());
+        }
+    }
+}
+```
 
 
+
+
+
+# springboot 配置Multipartfile

@@ -48,6 +48,8 @@ For servers that need to be more loosely and unreliably connected than clusterin
 
 ### `AMQP`协议
 
+(Advanced Message Queue Protocol)
+
 `RabbitMQ`最早开发就是为了支持`AMQP`，所以该协议是Broker支持的最核心的协议
 
 `AMQP` 0-9-1，0-9，0-8，和扩展协议

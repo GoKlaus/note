@@ -134,10 +134,6 @@ spring3
 
 ## 开发过程中的详细配置
 ### IOC容器配置
-#### xml配置式
-
-#### 注解配置式
-#### xml和注解比较
 ### web配置
 
 ==web.xml的作用==：**web.xml文件的作用是配置web工程启动**,对于一个web工程来说，web.xml可以有也可以没有，如果存在web.xml文件；web工程在启动的时候，**web容器(tomcat容器)**会去加载web.xml文件，然后按照一定规则配置web.xml文件中的组件。
@@ -169,20 +165,13 @@ c、加载Servlet：初始化DispatcherServlet，在SpringMVC架构中，Dispatc
 
 
 
-#### xml配置式
-#### 注解配置式
-#### 监听器
+#### 
 
 [listener学习](other/listener.md)
 
-#### xml配置式
-#### 注解配置式
-#### 控制器
 
 
-
-#### xml配置式
-#### 注解配置式
+#### 
 
 
 
@@ -451,6 +440,16 @@ k、reference  pointcut：表示引用其他命名切入点，只有@AspectJ风�
 
 
 
+# @Transactional
+
+在service 或者dao 或者controller 添加区别
+
+dao作用范围就是一次crud
+
+service作用范围内可能有多次crud
+
+具体如何实现一致性，遇到问题回滚，会完成的也会回滚吗？
+
 
 
 # @Autowired和@Resource注解的区别
@@ -603,4 +602,14 @@ multipart/byteranges
 3、如果调用afterPropertiesSet方法时出错，则不调用init-method指定的方法。
 
 
+
+# 实际遇到问题
+
+## @RequestBody和 MultipartFile 冲突的问题
+
+为什么冲突
+
+@RequestBody常用来处理Content-Type: 不是application/x-www-form-urlencoded编码的内容，例如application/json, application/xml等
+
+MultipartFile 可以处理Content-Type为application/x-www-form-urlencoded application/form-data
 
