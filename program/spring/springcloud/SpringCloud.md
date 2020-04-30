@@ -268,3 +268,21 @@ public class LoginFilter extends ZuulFilter{
 
 ```
 
+
+
+# zuul 请求服务无法新携带数据问题
+
+```java
+ ctx.addZuulRequestHeader("userId", String.valueOf(map.get("userId")));
+        ctx.addZuulRequestHeader("orgId", String.valueOf(map.get("orgId")));
+```
+
+参考
+
+
+
+## zuul 请求对MultipartFile的重置问题
+
+开发中一个请求中带有上传文件，ContentType 为 multipart/form-data
+
+但是到了具体服务不会认为是这个类型
