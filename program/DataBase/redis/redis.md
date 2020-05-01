@@ -412,3 +412,10 @@ I/O 多路复用其实是在单个线程中通过记录跟踪每一个sock（I/O
 
 
 select, poll, epoll 都是I/O多路复用的具体的实现。epoll性能比其他几者要好。redis中的I/O多路复用的所有功能通过包装常见的select、epoll、evport和kqueue这些I/O多路复用函数库来实现的
+
+
+
+# SETNX
+
+set if not exists
+

@@ -460,3 +460,12 @@ snapshots包强制更新: mvn package -u
 [IDEA包不存在找不到包解决方案](https://blog.csdn.net/qq_37740982/article/details/95481599)
 
 在这个问题上浪费了一天，情况表现为项目可以编译通过
+
+
+
+## 单独下载某个包
+
+```
+mvn dependency:get -DremoteRepositories=http://repo1.maven.org/maven2/ -DgroupId=junit -DartifactId=junit -Dversion=4.8.2
+```
+
