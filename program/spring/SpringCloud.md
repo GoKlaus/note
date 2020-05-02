@@ -286,3 +286,30 @@ public class LoginFilter extends ZuulFilter{
 开发中一个请求中带有上传文件，ContentType 为 multipart/form-data
 
 但是到了具体服务不会认为是这个类型
+
+
+
+
+
+## @RequestBody和 MultipartFile 冲突的问题
+
+为什么冲突
+
+@RequestBody常用来处理Content-Type: 不是application/x-www-form-urlencoded编码的内容，例如application/json, application/xml等
+
+MultipartFile 可以处理Content-Type为application/x-www-form-urlencoded application/form-data
+
+
+
+# SpringCloud feign 文件上传问题
+
+原因：
+
+feign对象相当于发起新的http请求，不做设置是不会支持文件上传的两种Content-Type的
+
+解决方案 
+
+```java
+
+```
+

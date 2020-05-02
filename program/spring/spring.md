@@ -605,11 +605,5 @@ multipart/byteranges
 
 # 实际遇到问题
 
-## @RequestBody和 MultipartFile 冲突的问题
 
-为什么冲突
-
-@RequestBody常用来处理Content-Type: 不是application/x-www-form-urlencoded编码的内容，例如application/json, application/xml等
-
-MultipartFile 可以处理Content-Type为application/x-www-form-urlencoded application/form-data
 
