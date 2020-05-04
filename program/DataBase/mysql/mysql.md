@@ -6,7 +6,17 @@
 
 创建（Create）、更新（Update）、读取（Retrieve）和删除（Delete）
 
+### Like
 
+四种匹配方式
+
+`%`-0个或者多个字符，有些情况若是中文，使用两个%%来表示
+
+`_`-表示任意单个字符
+
+`[]`-表示任意在括号的内的字符
+
+`[^]`-表示不再任意括号所列字段之内的单个字符
 
 ## 索引
 
@@ -465,6 +475,32 @@ transaction-isolation = {READ-UNCOMMITTED | READ-COMMITTED | REPEATABLE-READ | S
 - 可重复读(Repeated Read)：可重复读。在同一个事务内的查询都是事务开始时刻一致的，InnoDB默认级别。在SQL标准中，该隔离级别消除了不可重复读，但是还存在幻象读
 - 串行读(Serializable)：完全串行化的读，每次读都需要获得表级共享锁，读写相互都会阻塞
 
+```sql
+--事务的使用
+-- 开启事务
+begin;
+--start transaction;
+
+--回滚事务
+rollback;
+rollback work;
+
+--设置事务保存点
+savepoint identifier;
+--删除事务保存点
+release savepoint identifier;
+--回滚到事务保存点
+rollback to identifier;
+
+--设置事务级别
+set transaction
+
+
+
+
+
+```
+
 
 
 
@@ -513,7 +549,7 @@ like是广泛的模糊查询，而 find_in_set() 是精确匹配，并且字段�
 
 
 
-# 常见参数设置
+
 
 
 
