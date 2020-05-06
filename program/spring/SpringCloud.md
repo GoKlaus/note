@@ -3,6 +3,38 @@
 
 # SpringCloud
 
+bootstrap.yml作用
+
+1. 可以加载外部配置
+2. 优先级最高，不能被application.yml覆盖重写
+
+```properties
+# 通过设置SystemProperties 系统变量来禁用bootstrap配置文件
+spring.cloud.bootstrap.enabled=false
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# SpringCloud 和 Dubbo 对比
+
 概念：
 
 提springcloud 就离不开微服务的概念
