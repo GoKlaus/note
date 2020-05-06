@@ -700,11 +700,13 @@ replica-lazy-flush no
 # with the better durability guarantees.
 #
 # Please check http://redis.io/topics/persistence for more information.
+# AOF开启开关
 
 appendonly no
 
 # The name of the append only file (default: "appendonly.aof")
 
+# AOF数据保存文件的名字
 appendfilename "appendonly.aof"
 
 # The fsync() call tells the Operating System to actually write data on disk
@@ -730,8 +732,11 @@ appendfilename "appendonly.aof"
 #
 # If unsure, use "everysec".
 
+# 每一条都同步到AOF文件中
 # appendfsync always
+# 默认一秒fsync 一次
 appendfsync everysec
+# 不开启fsync
 # appendfsync no
 
 # When the AOF fsync policy is set to always or everysec, and a background
