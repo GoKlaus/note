@@ -1,0 +1,3 @@
+Zookeeper(CP)
+
+Leader选举出，Leader保证写数据的时候只向这个Leader写入，Leader会同步信息到其他节点。通过这个操作可以保证数据一致性

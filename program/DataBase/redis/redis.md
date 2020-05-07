@@ -190,7 +190,7 @@ Bloom Filter跟单哈希函数Bit-Map不同之处在于：Bloom Filter使用了k
 
 
 
-## 缓存击透
+## 缓存击穿
 
 ![](http://klaus_project.gitee.io/pic/note/缓存击透.jpg)
 
@@ -200,7 +200,7 @@ Bloom Filter跟单哈希函数Bit-Map不同之处在于：Bloom Filter使用了k
 每次查询都会直接打到DB
 ```
 
-bloomfilter 如何解决缓存击透问题
+bloomfilter 如何解决缓存击穿问题
 
 ![img]( http://klaus_project.gitee.io/pic/note/930376-20180502121459501-263550358.png)
 

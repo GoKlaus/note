@@ -9,6 +9,34 @@
 
 eureka保证高可用：eureka server之间复制同步注册的服务
 
+为什么说eureka比zookeeper更适合作为注册中心呢？
+
+eureka是基于AP原则的，zookeeper是基于CP原则的
+
+eureka 配置主要分三个模块的：
+
+- server
+- client
+- instance
+
+server配置
+
+```yml
+
+```
+
+client 配置
+
+```yml
+
+```
+
+
+
+
+
+
+
 client的心跳机制，默认心跳时间30s
 
 ```
@@ -46,4 +74,14 @@ public EurekaInstanceConfigBean eurekaInstanceConfig() {
   return b;
 }
 ```
+
+
+
+## Hytrix
+
+有什么概念？
+
+服务熔断
+
+服务降级
 
