@@ -4,6 +4,14 @@
 **参考资料**
 [spring模块结构](https://blog.csdn.net/sinat_35512245/article/details/53893910)
 
+
+
+
+
+
+
+
+
 ## Spring流程
 
 ![img](/home/klaus/documents/pic/note/1365825529_4693.png)
@@ -40,7 +48,7 @@ spring4
 >* web
 >* test
 >
->图中每一个圆角矩形，都对应一个jar，其groupId都为"org.springframework"，每一个jar都有一个不同的artifactId，另外"instrumentation"和"Messageing"有两个jar，还有一个"spring-context-support"没有列出来，故spring的jar包总共20来个
+>总共二十个左右的jar
 
 spring3
 ![e727ba103e22ce34b416947ce02b90f3.png](/home/klaus/documents/pic/note/20161227105720710.png)
@@ -50,7 +58,7 @@ spring3
 #### 以下介绍5个部分的jar以及依赖关系
 ##### core
   ore部分包含4个模块
-  >spring-core：依赖注入和DI的最基本实现
+  >spring-core：框架最基础的部分。提供IOC容器，对bean进行管理
   >spring-beans：Bean工厂和bean装配
   >spring-context：spring的上下文即`IOC`容器
   >spring- expression：spring表达式语言
