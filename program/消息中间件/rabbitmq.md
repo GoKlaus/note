@@ -126,9 +126,9 @@ RabbitMQ 是一个开源的 AMQP 实现，服务器端用Erlang语言编写，�
 - Headers：设置 header attribute 参数类型的交换机
 - Fanout：转发消息到所有绑定队列
 
-## 类型
+### 类型
 
-### Direct Exchange
+#### Direct Exchange
 
 Direct Exchange 是 RabbitMQ 默认的交换机模式，也是最简单的模式，根据key全文匹配去寻找队列。
 ![img](http://klaus_project.gitee.io/pic/note/rabbitMq_direct.png)
@@ -137,7 +137,7 @@ Direct Exchange 是 RabbitMQ 默认的交换机模式，也是最简单的模式
 
 Ps：为什么 X 到 Q2 要有 black，green，2个 binding key呢，一个不就行了吗？ - 这个主要是因为可能又有 Q3，而Q3只接受 black 的信息，而Q2不仅接受black 的信息，还接受 green 的信息。
 
-### Topic Exchange
+#### Topic Exchange
 
 *Topic Exchange 转发消息主要是根据通配符。* 在这种交换机下，队列和交换机的绑定会定义一种路由模式，那么，通配符就要在这种路由模式和路由键之间匹配后交换机才能转发消息。
 
@@ -157,12 +157,12 @@ topic 和 direct 类似, 只是匹配上支持了"模式", 在"点分"的 routin
 - `*`表示一个词.
 - `#`表示零个或多个词.
 
-### Headers Exchange
+#### Headers Exchange
 
 headers 也是根据规则匹配, 相较于 direct 和 topic 固定地使用 routing_key , headers 则是一个自定义匹配规则的类型.
 在队列与交换器绑定时, 会设定一组键值对规则, 消息中也包括一组键值对( headers 属性), 当这些键值对有一对, 或全部匹配时, 消息被投送到对应队列.
 
-### Fanout Exchange
+#### Fanout Exchange
 
 Fanout Exchange 消息广播的模式，不管路由键或者是路由模式，*会把消息发给绑定给它的全部队列*，如果配置了 routing_key 会被忽略。
 
