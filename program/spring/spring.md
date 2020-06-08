@@ -125,7 +125,9 @@ spring3
 
 `他们的依赖关系`
 
-![70ebd99c32d0cba94636eb3e957e9011.png](/home/klaus/documents/pic/note/20161227105944604.png)![f61592c8c2b9f6e1dc28c0c95884b3d0.png](/home/klaus/documents/pic/note/20161227110103559-1552272914280.png)
+![70ebd99c32d0cba94636eb3e957e9011.png](/home/klaus/documents/pic/note/20161227105944604.png)
+
+![f61592c8c2b9f6e1dc28c0c95884b3d0.png](/home/klaus/documents/pic/note/20161227110103559-1552272914280.png)
 
 
 ##### test和spring-context-support
@@ -578,6 +580,21 @@ multipart/byteranges
 2、实现InitializingBean接口是直接调用afterPropertiesSet方法，比通过反射调用init-method指定的方法效率要高一点，但是init-method方式消除了对spring的依赖。
 
 3、如果调用afterPropertiesSet方法时出错，则不调用init-method指定的方法。
+
+
+
+
+
+# Bean的作用域问题
+
+| 类别          | 说明                                                         |      |
+| ------------- | ------------------------------------------------------------ | ---- |
+| singleton     | 单例                                                         |      |
+| prototype     | 每次从容器获取，就会新实例一个bean                           |      |
+| request       | 每次http请求会创建一个新的bean                               |      |
+| session       | 同一个http session共享一个bean                               |      |
+| globalsession | 一般用于portlet应用环境，该作用域仅适用于WebApplicationContext环境 |      |
+|               |                                                              |      |
 
 
 
