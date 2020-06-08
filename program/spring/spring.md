@@ -567,7 +567,7 @@ multipart/byteranges
 
 [MIME](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types)
 
-
+![img](https://img-blog.csdn.net/20170301154450018?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxMDY0NDQ0OA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center)
 
 # InitializingBean
 
@@ -595,6 +595,82 @@ multipart/byteranges
 | session       | 同一个http session共享一个bean                               |      |
 | globalsession | 一般用于portlet应用环境，该作用域仅适用于WebApplicationContext环境 |      |
 |               |                                                              |      |
+
+
+
+# spring循环依赖
+
+循环依赖就是N个类中循环嵌套使用
+
+spring中有三级缓存
+
+```java
+/** Cache of singleton objects: bean name --> bean instance */
+private final Map<String, Object> singletonObjects = new ConcurrentHashMap<String, Object>(256);
+
+/** Cache of singleton factories: bean name --> ObjectFactory */
+private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<String, ObjectFactory<?>>(16);
+
+/** Cache of early singleton objects: bean name --> bean instance */
+private final Map<String, Object> earlySingletonObjects = new HashMap<String, Object>(16);
+```
+
+三级缓存分别指
+
+singletonFactories ： 单例对象工厂的cache
+earlySingletonObjects ：提前暴光的单例对象的Cache
+singletonObjects：单例对象的cache
+
+
+
+先从缓存中获取
+
+```java
+protected Object getSingleton(String beanName, boolean allowEarlyReference) {
+    Object singletonObject = this.singletonObjects.get(beanName);//获取一级缓存中数据
+    if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
+        synchronized (this.singletonObjects) {
+            singletonObject = this.earlySingletonObjects.get(beanName);
+            if (singletonObject == null && allowEarlyReference) {
+                ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
+                if (singletonFactory != null) {
+                    singletonObject = singletonFactory.getObject();
+                    this.earlySingletonObjects.put(beanName, singletonObject);//放入二级缓存
+                    this.singletonFactories.remove(beanName);//从三级缓存删除
+                }
+            }
+        }
+    }
+    return (singletonObject != NULL_OBJECT ? singletonObject : null);
+}
+```
+
+从三级缓存中获取后，移除三级缓存的数据到二级缓存并删除三级缓存的数据
+
+```java
+protected void addSingletonFactory(String beanName, ObjectFactory<?> singletonFactory) {
+    Assert.notNull(singletonFactory, "Singleton factory must not be null");
+    synchronized (this.singletonObjects) {
+        if (!this.singletonObjects.containsKey(beanName)) {
+            this.singletonFactories.put(beanName, singletonFactory);
+            this.earlySingletonObjects.remove(beanName);
+            this.registeredSingletons.add(beanName);
+        }
+    }
+}
+```
+
+
+
+## 构造器参数循环依赖
+
+
+
+## setter方式单例
+
+
+
+## setter方式原型，prototype
 
 
 

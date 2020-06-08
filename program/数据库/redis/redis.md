@@ -85,7 +85,7 @@ set 是无序集合，自动去重。
 
 直接基于 set 将系统里需要去重的数据扔进去，自动就给去重了，如果你需要对一些数据进行快速的全局去重，你当然也可以基于 jvm 内存里的 HashSet 进行去重，但是如果你的某个系统部署在多台机器上呢？得基于 redis 进行全局的 set 去重。
 
-可以基于 set 玩儿交集、并集、差集的操作，比如交集吧，可以把两个人的粉丝列表整一个交集，看看俩人的共同好友是谁？对吧。
+可以基于 set 交集、并集、差集的操作，比如交集吧，可以把两个人的粉丝列表整一个交集，看看俩人的共同好友是谁？对吧。
 
 把两个大 V 的粉丝都放在两个 set 中，对两个 set 做交集。
 
@@ -173,116 +173,17 @@ Redis-ML
 
 
 
-==缓存穿透==  --
 
 
 
-BloomFilter -- 布隆过滤器
-
-概念：布隆过滤器（英语：Bloom Filter）是1970年由一个叫布隆的小伙子提出的。它实际上是一个很长的二进制向量和一系列随机映射函数。布隆过滤器可以用于检索一个元素是否在一个集合中。它的优点是空间效率和查询时间都远远超过一般的算法，缺点是有一定的误识别率和删除困难。
-
-布隆过滤器的原理是，当一个元素被加入集合时，通过K个散列函数将这个元素映射成一个位数组中的K个点，把它们置为1。检索时，我们只要看看这些点是不是都是1就（大约）知道集合中有没有它了：如果这些点有任何一个0，则被检元素一定不在；如果都是1，则被检元素很可能在。这就是布隆过滤器的基本思想。
-
-Bloom Filter跟单哈希函数Bit-Map不同之处在于：Bloom Filter使用了k个哈希函数，每个字符串跟k个bit对应。从而降低了冲突的概率
-
-
-![]( http://klaus_project.gitee.io/pic/note/BloomFilter.jpg)
-
-
-
-## 缓存击穿
-
-![](http://klaus_project.gitee.io/pic/note/缓存击透.jpg)
-
-
-
-```t
-每次查询都会直接打到DB
-```
-
-bloomfilter 如何解决缓存击穿问题
-
-![img]( http://klaus_project.gitee.io/pic/note/930376-20180502121459501-263550358.png)
-
-
-
-### BloomFilter  缺点
-
-bloom filter之所以能做到在时间和空间上的效率比较高，是因为牺牲了判断的准确率、删除的便利性
-
-- 存在误判，可能要查到的元素并没有在容器中，但是hash之后得到的k个位置上值都是1。如果bloom filter中存储的是黑名单，那么可以通过建立一个白名单来存储可能会误判的元素。
-- 删除困难。一个放入容器的元素映射到bit数组的k个位置上是1，删除的时候不能简单的直接置为0，可能会影响其他元素的判断。可以采用Counting Bloom Filter
-
-
-
-## BloomFilter实现
-
-布隆过滤器有许多实现与优化，Guava中就提供了一种Bloom Filter的实现。
-
-在==使用bloom filter==时，绕不过的两点是==预估数据量n==以及==期望的误判率fpp==，
-
-在==实现bloom filter==时，绕不过的两点就是==hash函数==的选取以及==bit数组的大小==。
-
-
-
-对于一个确定的场景，我们预估要存的数据量为n，期望的误判率为fpp，然后需要计算我们需要的Bit数组的大小m，以及hash函数的个数k，并选择hash函数
-
-### (1)Bit数组大小选择
-
- 根据预估数据量n以及误判率fpp，bit数组大小的m的计算方式： 
-
-
-![]( http://klaus_project.gitee.io/pic/note/bit数组公式.jpg)
-
-### (2)哈希函数选择
-
- 由预估数据量n以及bit数组长度m，可以得到一个hash函数的个数k：
-
-## 缓存雪崩
-
-如果有大量的key需要设置同一时间过期，一般需要注意什么？
-
-现象：
-如果大量的key过期时间设置的过于集中，到过期的那个时间点，Redis可能会出现短暂的卡顿现象。严重的话会出现缓存雪崩，我们一般需要在时间上加一个随机值，使得过期时间分散一些。
-
-方案1、也是像解决缓存穿透一样加锁排队，实现同上;
-
-```
-public String getByKey(String keyA,String keyB) {
-    String value = redisService.get(keyA);
-    if (StringUtil.isEmpty(value)) {
-        value = redisService.get(keyB);
-        String newValue = getFromDbById();
-        redisService.set(keyA,newValue,31, TimeUnit.DAYS);
-        redisService.set(keyB,newValue);
-    }
-    return value;
-}
-```
-
-方案2、建立备份缓存，缓存A和缓存B，A设置超时时间，B不设值超时时间，先从A读缓存，A没有读B，并且更新A缓存和B缓存;
-
-方案3、设置缓存超时时间的时候加上一个随机的时间长度，比如这个缓存key的超时时间是固定的5分钟加上随机的2分钟，酱紫可从一定程度上避免雪崩问题；
-
-
-
-**电商首页经常会使用定时任务刷新缓存，可能大量的数据失效时间都十分集中，如果失效时间一样，又刚好在失效的时间点大量用户涌入，就有可能造成缓存雪崩**
-
-那你使用过Redis分布式锁么，它是什么回事？
-
-先拿**setnx**来争抢锁，抢到之后，再用**expire**给锁加一个过期时间防止锁忘记了释放。
-
-
-
-## 缓存击穿
-
-至于**缓存击穿**嘛，这个跟**缓存雪崩**有点像，但是又有一点不一样，缓存雪崩是因为大面积的缓存失效，打崩了DB，而缓存击穿不同的是**缓存击穿**是指一个Key非常热点，在不停的扛着大并发，大并发集中对这一个点进行访问，当这个Key在失效的瞬间，持续的大并发就穿破缓存，直接请求数据库，就像在一个完好无损的桶上凿开了一个洞。
 
 
 
 ## 缓存穿透
 
 缓存穿透是指缓存和数据库中都没有的数据，而用户不断发起请求，我们数据库的 id 都是1开始自增上去的，如发起为id值为 -1 的数据或 id 为特别大不存在的数据。这时的用户很可能是攻击者，攻击会导致数据库压力过大，严重会击垮数据库。
+
+这种查询不存在数据的现象称作 **缓存穿透**
 
 
 
@@ -344,7 +245,7 @@ redis 单线程模型效率高：
 ### 数据结构
 
 - redis拥有更多的数据结构，能支持更丰富的数据操作如果需要缓存能够支持更复杂的结构和操作选用redis
-- memcached支持string
+- memcached只支持string
 
 ### 集群模式
 
@@ -353,6 +254,128 @@ redis 单线程模型效率高：
 #### 性能对比
 
 由于 redis 只使用**单核**，而 memcached 可以使用**多核**，所以平均每一个核上 redis 在存储小数据时比 memcached 性能更高。而在 100k 以上的数据中，memcached 性能要高于 redis。虽然 redis 最近也在存储大数据的性能上进行优化，但是比起 memcached，还是稍有逊色。
+
+
+
+# redis模式
+
+## 单机模式
+
+
+
+## 主从模式
+
+1. 默认配置，master节点可以进行读和写，slave只能进行读操作（readonly）
+2. 不要修改配置让slave节点支持写操作，无意义，原因一，写入的数据不会被同步到其他节点;原因二，当master节点修改同一条数据后，slave节点的数据会被覆盖掉
+3. slave状态不影响其他slave节点的读和master节点的读和写，重新启动后将从master节点同步过来
+4. 这种模式下，master节点挂了，slave不会竞选成为master，不会影响slave的读，但是不会提供写服务，master节点启动之后才会重新提供写服务
+5. master节点设置密码时
+   客户端访问master需要密码
+   slave启动需要密码，在配置中进行配置即可
+   客户端访问slave不需要密码
+
+
+
+客户端之续哟啊配置一个密码参数，redis配置文件配置两个参数
+
+```conf
+masterauth "masterauthword"
+
+requirepass "password"
+```
+
+客户端配置文件
+
+```
+jedis-cluster.password=password
+```
+
+### 缺点
+
+master挂掉对外无法提供写服务，生产环境不能停止服务，所以一般生产环境不会单单只有主从模式的，可以配合sentinel哨兵模式使用
+
+## Sentinel（哨兵）模式
+
+主从模式中，master节点挂了之后，slave不能主动选举一个master节点出来，安排一个或多个sentinel来做这件事，当sentinel发现master节点挂了以后，sentinel会**从slave中选举一个master**
+
+
+
+1. sentinel模式建立在主从模式的基础上，如果只有一个redis节点，sentinel就没有任何意义
+2. 当master节点挂了之后，sentinel会从slave中选举一个作为master，并且修改他们的配置文件，其他的slave配置文件也会被修改，比如slaveof属性就会指向新的master
+3. 当master节点重新启动后，将不再是master，而是作为slave接收心的master节点的同步数据
+4. sentinel因为也是一个进程有挂掉的可能，所以sentinel也会启动多个形成一个sentinel集群
+5. 主从模式配置的密码，sentinel会同步将配置信息修改到配置文件中，不需要担心
+6. 一个sentinel或sentinel集群可以管理多个主从redis
+7. sentinel最好不要和redis部署在同意台机器，redis服务器宕机，sentinel也胡宕机
+8. sentinel监控redis集群都会定义一个master名字，这个名字代表redis集群的master redis
+
+
+
+
+
+使用sentinel模式的时候，客户端不要直接连接redis，而是直接连接sentinel的ip和port，由sentinel来提供具体可提供服务的redis实现，当master节点挂掉后，sentinel就会感知并将心的master节点提供给使用者
+
+
+
+sentinel本身支持集群，单节点sentinel是不可靠的：
+
+1. 单点sentinel，如果出现进程运行出错，或者网络阻塞，将无法实现redis集群的主备切换（单点问题）
+2. 如果有多个sentinel，redis的客户端可以随意连接一个sentinel来获取关于redis集群中的信息
+3. sentinel本身需要多数机制，也就是2个sentinel进程时，挂掉一个另一个就不可用了
+
+### sentinel集群
+
+sentinel集群不需要设置其他的sentinel地址，sentinel进程可以通过发布与订阅来自动发现正在监视相同主实例的其他sentinel。当一个sentinel发现一个新的sentinel时，会将新的sentinel添加到一个列表中，这个列表保存了sentinel已知的，监视同一个主服务器的所有其他sentinel
+
+
+
+sentinel集群中的sentinel不会同一时刻并发去failover（故障切换or故障转移）同一个master，第一个进行failover的sentinel如果失败了（failover-timeout），另一个才会去重新failover
+
+
+
+当Sentinel将一个slave选举为master并发送SLAVE OF NO ONE后，即使其它的slave还没针对新master重新配置自己，failover也被认为是成功了
+
+
+
+上述过度过程中，若此时重启old master，则redis集群将处于无master状态，此时只能手动修改配置文件，然后重新启动集群.（生产情况下千万不要做如此愚蠢的操作，否则你会导致整个应用集群都启动失败。）
+
+　　Master-Slave切换后，Sentinel会改写master，slave和sentinel的conf配置文件。
+
+　　一旦一个Sentinel成功地对一个master进行了failover，它将会把关于master的最新配置通过广播形式通知其它sentinel，其它的Sentinel则更新对应master的配置。
+
+
+
+## Cluster（集群）模式
+
+本人所在项目组使用的cluster模式，项目在生产环境有8个Redis集群，每个集群的dbsize都在千万级。这种数据量显然不是哨兵模式可以满足的。
+
+　　cluster的出现是为了解决单机Redis容量有限的问题，将Redis的数据根据一定的规则分配到多台机器。对cluster的一些理解：
+
+　　一个 Redis 集群包含 16384 个哈希槽（hash slot），数据库中的每个键都属于这 16384 个哈希槽的其中一个，集群中的每个节点负责处理一部分哈希槽。
+
+　　例如一个集群有三个主节点，其中：
+
+　　节点 A 负责处理 0 号至 5500 号哈希槽。
+
+　　节点 B 负责处理 5501 号至 11000 号哈希槽。
+
+　　节点 C 负责处理 11001 号至 16384 号哈希槽。
+
+　　这种将哈希槽分布到不同节点的做法使得用户可以很容易地向集群中添加或者删除节点。例如：如果用户将新节点 D 添加到集群中， 那么集群只需要将节点 A 、B 、 C 中的某些槽移动到节点 D 就可以了。
+
+　　如果用户要从集群中移除节点 A ， 那么集群只需要将节点 A 中的所有哈希槽移动到节点 B 和节点 C ， 然后再移除空白（不包含任何哈希槽）的节点 A 就可以了。
+
+　　这里需要注意的是，集群如果是5主5从，主节点也是16384个hash slot，而不会因为主节点的增多slot也增多。我们在分槽的时候，尽量把槽平均分给主节点。因为一个key落在哪个槽里面，是根据key的CRC16值模上16384得出的值来计算的。
+
+　　2.Redis 集群对节点使用了主从复制功能： 集群中的每个节点都有 1 个至 N 个复制品（replica）， 其中一个复制品为主节点（master）， 而其余的 N-1 个复制品为从节点（slave）。
+
+　　我们知道集群模式下，1主N从时，当主节点挂掉时，从节点通过心跳监听机制，会竞选成为主节点（这时设置的readonly会失效），所以在部署的时候，主从节点应该部署在不同的机器上，这个时候如果主节点的服务器宕机，从节点竞选成功后会继续承担读写的任务。
+
+　　3.Redis 集群的节点间通过Gossip协议通信。
+
+　　4.当前Redis集群不支持NAT环境或者IP，端口重新映射的环境。
+
+　　cluster这种模式适合数据量巨大的缓存要求，当数据量不是很大使用sentinel即可。
 
 
 
