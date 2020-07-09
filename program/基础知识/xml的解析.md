@@ -1,0 +1,1 @@
+DTD和Schema两种形式，

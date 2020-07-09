@@ -398,6 +398,22 @@ Java通过`Executors（jdk1.5并发包）`提供四种线程池，分别为：
 
 
 
+# BlockingQueue
+
+四个具体的实现类
+
+1. ArrayBlockingQueue：数组阻塞队列，==**规定大小**==， 其构造函数必须带一个int参数来指明大小。顺序是FIFO先入先出来排序的
+2. LinkedBlockingQueue：链阻塞队列，大小不固定，若其构造函数带一个规定大小的参数，生成的BlockingQueue有大小限制，若不带大小参数，所生成的BlockingQueue大小由Integer.MAX_VALUE来决定。FIFO
+3. PriorityBlockingQueue：类似于LinkedBlockingQueue，但其所含对象的排序不是FIFO，而是依据对象的自然排序或者是构造函数所带的Comparator决定顺序
+4. SynchronousQueue：特殊的BlockingQueue，他的内部同时只能够容纳单个元素，对其操作必须是放和取交替完成的。
+5. DelayQueue：延迟队列，注入其中的元素必须实现java.util.concurrent.Delayed接口
+
+
+
+
+
+
+
 
 
 
