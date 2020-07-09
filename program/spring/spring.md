@@ -14,10 +14,6 @@
 
 ## Spring流程
 
-![img](/home/klaus/documents/pic/note/1365825529_4693.png)
-
-![img](/home/klaus/documents/pic/note/1365825551_8302.png)
-
 ### Spring工作流程描述
 
 1. 用户向服务器发送请求，请求被Spring 前端控制Servelt DispatcherServlet捕获；
@@ -37,142 +33,6 @@
 
 ## spring项目结构
 
-### 包含的模块
-spring4
-![915fc56e425633a1759f6bca087ae50a.png](/home/klaus/documents/pic/note/20161227110029533-1552272732616.png)
-
-### spring分为5个部分
->* core
->* aop
->* data access
->* web
->* test
->
->总共二十个左右的jar
-
-spring3
-![e727ba103e22ce34b416947ce02b90f3.png](/home/klaus/documents/pic/note/20161227105720710.png)
-
->spring3 有19个jar
-******
-#### 以下介绍5个部分的jar以及依赖关系
-##### core
-  ore部分包含4个模块
-  >spring-core：框架最基础的部分。提供IOC容器，对bean进行管理
-  >spring-beans：Bean工厂和bean装配
-  >spring-context：spring的上下文即`IOC`容器
-  >spring- expression：spring表达式语言
-
-`他们的完整依赖关系`:
-    ![7d2de72e97bbbf6fd548ff3cc4b1ee85.png](assets/20161227105801579.png)
-    
-
->spring-core依赖了commons-logging，而其他的模块都依赖了spring-core，故整个spring框架都依赖了commons-logging
-
-`只引入spring-context包的情况下会自动导入其他的jar包`
-```
-<dependency>  
-    <groupId>org.springframework</groupId>  
-    <artifactId>spring-context</artifactId>  
-    <version>${spring.version}</version>
-</dependency>
-```
-`结果如下`
-
-![8d7c16e7610c9d31e2edfd1b14795374.png](/home/klaus/documents/pic/note/Image.png)
-`所以可以直接引入context包`
-
-
-
-##### AOP
-`AOP部分包含六个模块`
-
->* spring-aop：面向切面编程
->* spring-aspects：集成AspectJ
->* spring- instrument：提供一些类级的工具支持和ClassLoader级的实现，用于服务器
->* spring-instrument-tomcat：针对tomcat的instrument实现
->* spring-websocket：为web应用提供的高效通信工具
->* spring-messaging：用于构建基于消息的应用程序
-
-`他们的依赖关系`
-![41c3268dbdea0f6c1cffaaadd17f8f78.png](/home/klaus/documents/pic/note/20161227105855947.png)
-![f61592c8c2b9f6e1dc28c0c95884b3d0.png](/home/klaus/documents/pic/note/20161227110103559.png)
-
-
-
-##### data access
->data access 部分包含5个模块
->* spring-jdbc：jdbc的支持
->* spring-tx：事务的控制
->* spring-orm：对象关系映射，集成orm框架
->* spring-oxm：对象xml映射
->* spring-jms：java消息服务
-
-
-
-`他们的依赖关系`
-![2d92c835c6f6f072fcf2b9415d69f3d8.png](/home/klaus/documents/pic/note/20161227105923275.png)
-
-##### web
->web包含4个模块
->* spring-web：基础web功能，如文件上传
->* spring-webmvc：mvc实现
->* spring-webmvc-portlet：基于portlet的mvc实现
->* spring-websocket
->>spring3提供的是
->>
->>* spring-struts：与struts的集成，不推荐，spring4不再提供
-
-`他们的依赖关系`
-
-![70ebd99c32d0cba94636eb3e957e9011.png](/home/klaus/documents/pic/note/20161227105944604.png)
-
-![f61592c8c2b9f6e1dc28c0c95884b3d0.png](/home/klaus/documents/pic/note/20161227110103559-1552272914280.png)
-
-
-##### test和spring-context-support
->test部分只有一个模块，将spring-context-support也放在这里
->* spring-test：spring测试，提供junit和mock的功能测试
->* spring-context-support：spring的额外支持包，比如邮件服务，视图解析等
->  `他们的依赖关系`
->  ![c63fee268ee45f57beb804ba8a93f1cf.png](/home/klaus/documents/pic/note/20161227110008855.png)
-
-
-
-## 添加依赖
->添加依赖的过程中，一些jar包依赖于项目中其他的jar包，可以不用在pom中书写太多的jar包
-
-## 开发过程中的详细配置
-### IOC容器配置
-### web配置
-
-==web.xml的作用==：**web.xml文件的作用是配置web工程启动**,对于一个web工程来说，web.xml可以有也可以没有，如果存在web.xml文件；web工程在启动的时候，**web容器(tomcat容器)**会去加载web.xml文件，然后按照一定规则配置web.xml文件中的组件。
-
-==web容器的加载顺序==：ServletContext -> context-param -> listener -> filter ->servlet ;不会因在web.xml中的书写顺序改变：   
-   a、web容器启动后,会去加载web.xml文件，读取listener和context-param两个节点
-   b、创建一个ServletContext（Servlet上下文）这个上下文供所有部分共享
-   c、容器将context-param转换成键值对，交给ServletContext
-   d、接着按照上述顺序继续执行
-
-![img](/home/klaus/documents/pic/note/16787cb36ca9e2dd)
-
-![img](/home/klaus/documents/pic/note/1678bc7b61df1c4f)
-
-**加载顺序** 
-a、首先加载Spring容器加载器：ContextLoaderListener
-
-b、加载过滤器Filter（此处以编码过滤器CharacterEncodingFilter为例）此过滤器的作用就是设置请求参数的编码为UTF-8.
-
-c、加载Servlet：初始化DispatcherServlet，在SpringMVC架构中，DispatchServlet负责请求分发，起到控制器的作用
-
-#### 过滤器
-
-```
-作用：
-```
-
-
-
 
 
 #### 
@@ -185,11 +45,15 @@ c、加载Servlet：初始化DispatcherServlet，在SpringMVC架构中，Dispatc
 
 
 
-
-
-
-
 需要说明的是 Spring Boot 2.0 已经不再支持使用继承WebMvcConfigurerAdapter 来实现MVC 配置了
+
+新的使用
+
+```java
+public class WebConfig implements WebMvcConfigurer {
+  
+}
+```
 
 
 
@@ -223,75 +87,6 @@ AOP(Aspect Oriented Programming)面向切面编程，OOP(Object Oriented Program
 8、引入（introduction）
 
 
-
-在代码使用遇到的问题
-
-定义注解类
-
-```java
-/*
-* 写这个注解类是用来记录一些借口操作的日志
-* 所以切入点是在接口方法入口处使用注解
-*/
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Log {
-    String value() default "";
-}
-```
-
-
-
-这个类是对文章进行操作的
-
-```java
-/**
- * description:
- * author:zhaoxingbao
- * date:2019/6/10
- * co:
- */
-@RestController
-@RequestMapping("/article")
-@Slf4j
-public class ArticleController extends BaseController {
-
-    @Autowired
-    private ArticleService articleService;
-
-    /**
-     *
-     * @return
-     */
-    @RequestMapping("/save")
-    @Log("新增文章")
-    public String save(@Validated @RequestBody Article article){
-        try {
-            articleService.save(article);
-            return JsonUtil.getSucc(Constant.SUC);
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            throw new GlobalException(e.getMessage());
-        }
-    }
-
-    @RequestMapping("/delete")
-    @Log("删除文章")
-    public String delete(@RequestBody List<Long> ids){
-        try {
-            if(null == ids || ids.size() == 0){
-                return JsonUtil.getErrorJson(Constant.PARAM_ERROR);
-            }
-            articleService.softDelete(ids);
-            return JsonUtil.getSucc(Constant.SUC);
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.info(e.getMessage());
-            throw new GlobalException(e.getMessage());
-        }
-    }
-}
-```
 
 
 
@@ -573,8 +368,6 @@ multipart/byteranges
 
 这个接口只有一个方法afterPropertiesSet()
 
-
-
 1、Spring为bean提供了两种初始化bean的方式，实现InitializingBean接口，实现afterPropertiesSet方法，或者在配置文件中通过init-method指定，两种方式可以同时使用。
 
 2、实现InitializingBean接口是直接调用afterPropertiesSet方法，比通过反射调用init-method指定的方法效率要高一点，但是init-method方式消除了对spring的依赖。
@@ -674,7 +467,7 @@ protected void addSingletonFactory(String beanName, ObjectFactory<?> singletonFa
 
 
 
-# 实际遇到问题
+
 
 
 

@@ -4,6 +4,11 @@
 
 ## Stream编程
 
+```java
+list.stream().filter();
+list.stream().map();
+```
+
 
 
 ## 接口的默认方法
