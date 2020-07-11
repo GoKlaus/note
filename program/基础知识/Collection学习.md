@@ -83,3 +83,5 @@ treeify = 8
 ## HashSet
 
 底层用的是HashMap来存储
+
+对象hashcode 作为key 存储在HashMap中
