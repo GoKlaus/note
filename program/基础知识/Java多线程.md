@@ -388,13 +388,37 @@ wait()使用前提：线程必须获取到该对象的对象级别锁，只能�
 
 
 
+线程池的优势：
+
+降低资源消耗。复用已创建的线程降低线程创建和销毁的消耗
+
+提高相应速度。任务到达时不需要等到线程创建就能立即执行
+
+提高线程的可管理性。线程是稀缺资源，如果无限制的创建，不仅会消耗系统资源，还会降低系统的稳定性，使用线程池可以进行统一的分配，调优和监控
+
 # 线程池的创建方式
 
 Java通过`Executors（jdk1.5并发包）`提供四种线程池，分别为：
-`newCachedThreadPool`创建一个可缓存线程池，如果线程池长度超过处理需要，可灵活回收空闲线程，若无可回收，则新建线程。
+`newCachedThreadPool` 可缓存线程池，如果线程池长度超过处理需要，可灵活回收空闲线程，若无可回收，则新建线程。
 `newFixedThreadPool` 创建一个定长线程池，可控制线程最大并发数，超出的线程会在队列中等待。
 `newScheduledThreadPool `创建一个定长线程池，支持定时及周期性任务执行。
 `newSingleThreadExecutor`创建一个单线程化的线程池，它只会用唯一的工作线程来执行任务，保证所有任务按照指定顺序(FIFO, LIFO, 优先级)执行。
+
+
+
+executor 的关闭方式
+
+通过shutdown  和 shutdowNow 两个方法完成
+
+也可以这样
+
+```JAVA
+executor.awaitTermination(5, TimeUnit.SECONDS)
+```
+
+
+
+
 
 
 
@@ -412,11 +436,44 @@ Java通过`Executors（jdk1.5并发包）`提供四种线程池，分别为：
 
 
 
+# Callable
+
+ExecutorService.submit 可以来执行这个接口
+
+底层的还是使用Runable吗？
 
 
 
+并行流底层还是Fork/Join框架，只是任务拆分优化得很好。
+
+```java
+Instant start = Instant.now();
+        long result = LongStream.rangeClosed(0, 10000000L).parallel().reduce(0, Long::sum);
+        Instant end = Instant.now();
+        System.out.println("耗时：" + Duration.between(start, end).toMillis() + "ms");
+
+        System.out.println("结果为：" + result);
+```
+
+耗时效率方面解释：Fork/Join 并行流等当计算的数字非常大的时候，优势才能体现出来。计算比较小，或者不是CPU密集型的任务，不建议使用并行处理
+
+fork()：开启一个新线程（或是重用线程池内的空闲线程），将任务交给该线程处理。
+join()：等待该任务的处理线程处理完毕，获得返回值
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20190617160144126.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L20wXzM3NTQyODg5,size_16,color_FFFFFF,t_70)
 
 
 
+Fork/join Fremework 底层使用到了work stealing 算法
+
+那么什么是work stealing 算法
 
 
+
+并发的学习，离不开三个概念，进程，线程，还有纤程
+
+
+
+一个单核心的cpu，无论何时都是只有一个线程在运行，体现出多线程在运行的现象是因为时间切片的存在，cpu不会空闲
+
+IPC（Inter Process Communication) resource 

@@ -8,11 +8,11 @@
 
 
 
-
-
-
-
 ## Spring流程
+
+![img](/home/klaus/documents/pic/note/1365825529_4693.png)
+
+![img](/home/klaus/documents/pic/note/1365825551_8302.png)
 
 ### Spring工作流程描述
 
@@ -29,31 +29,40 @@
 7.  ViewResolver 结合Model和View，来渲染视图
 8.  将渲染结果返回给客户端。
 
+## 开发过程中的详细配置
+### IOC容器配置
+### web配置
+
+==web.xml的作用==：**web.xml文件的作用是配置web工程启动**,对于一个web工程来说，web.xml可以有也可以没有，如果存在web.xml文件；web工程在启动的时候，**web容器(tomcat容器)**会去加载web.xml文件，然后按照一定规则配置web.xml文件中的组件。 这是servlet标准定义的
+
+==web容器的加载顺序==：ServletContext -> context-param -> listener -> filter ->servlet ;不会因在web.xml中的书写顺序改变：   
+   a、web容器启动后,会去加载web.xml文件，读取listener和context-param两个节点
+   b、创建一个ServletContext（Servlet上下文）这个上下文供所有部分共享
+   c、容器将context-param转换成键值对，交给ServletContext
+   d、接着按照上述顺序继续执行
+
+![img](/home/klaus/documents/pic/note/16787cb36ca9e2dd)
+
+![img](/home/klaus/documents/pic/note/1678bc7b61df1c4f)
+
+**加载顺序** 
+a、首先加载Spring容器加载器：ContextLoaderListener
+
+b、加载过滤器Filter（此处以编码过滤器CharacterEncodingFilter为例）此过滤器的作用就是设置请求参数的编码为UTF-8.
+
+c、加载Servlet：初始化DispatcherServlet，在SpringMVC架构中，DispatchServlet负责请求分发，起到控制器的作用
+
+#### 过滤器
+
+```
+作用：
+```
 
 
-## spring项目结构
-
-
-
-#### 
-
-[listener学习](other/listener.md)
-
-
-
-#### 
 
 
 
 需要说明的是 Spring Boot 2.0 已经不再支持使用继承WebMvcConfigurerAdapter 来实现MVC 配置了
-
-新的使用
-
-```java
-public class WebConfig implements WebMvcConfigurer {
-  
-}
-```
 
 
 
@@ -88,96 +97,13 @@ AOP(Aspect Oriented Programming)面向切面编程，OOP(Object Oriented Program
 
 
 
+## spring validation
+
+在使用验证功能时，spring 通过aop的方式实现的，参考MethodValidationIntercepter
+
+https://blog.csdn.net/wt_better/article/details/84635010
 
 
-切面编程
-
-```java
-@Aspect
-@Component
-public class LogAspect {
-
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    @Autowired
-    private LogService logService;
-
-    /**
-     * @description
-     * @author zhaoxingbao
-     * @date 2019/6/4 9:25
-     * @param
-     * @return
-     */
-    @Pointcut("@annotation(com.opco.blog.admin.annotation.Log)")
-    public void pointcut(){
-
-    }
-
-    @Around("pointcut()")
-    public Object around(ProceedingJoinPoint proceedingJoinPoint) throws JsonProcessingException {
-        Object result = null;
-        long beginTime = System.currentTimeMillis();
-        try {
-            result = proceedingJoinPoint.proceed();
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-            throw new GlobalException(throwable.getMessage());
-        }
-        //获取request请求
-        HttpServletRequest request = HttpContextUtil.getHttpServletRequest();
-        //设置ip地址
-        String ip  = IPUtil.getIPAddr(request);
-        //记录时间
-        long time = System.currentTimeMillis() - beginTime;
-        //保存日志
-        User user = (User) SecurityUtils.getSubject().getPrincipal();
-        SysLog sysLog = new SysLog();
-        sysLog.setUsername(user.getUsername());
-        sysLog.setIp(ip);
-        sysLog.setTime(time);
-        logService.saveLog(proceedingJoinPoint,sysLog);
-        return result;
-    }
-
-}
-```
-
-## 注解说明
-
-1、@Aspect
-
-作用是把当前类表示为一个切面供容器读取
-
-2、@Before
-
-标识一个前置增强方法，相当于BeforeAdvice的功能
-
-3、@AfterReturning
-
-后置增强，相当于AfterReturningAdvice，方法正常退出时执行
-
-4、@AfterThrowing
-
-异常抛出增强，相当于ThrowAdvice
-
-5、@After
-
-final增强，不管是抛出异常或者正常退出都会执行
-
-6、@Around
-
-环绕增强，相当于MethodInterceptor
-
-7、@DeclareParents
-
-引介增强，相当于IntroductionInterceptor
-
-### 命名及匿名切入点
-
-命名切入点可以被其他切入点引用，而匿名切入点是不可以的。只有@AspectJ支持命名切入点，而Schema风格不支持命名切入点。
-
-![img](assets/659572-20160630115431452-1286976858.png)
 
 ## AspectJ组合切入点表达式
 
@@ -368,6 +294,8 @@ multipart/byteranges
 
 这个接口只有一个方法afterPropertiesSet()
 
+
+
 1、Spring为bean提供了两种初始化bean的方式，实现InitializingBean接口，实现afterPropertiesSet方法，或者在配置文件中通过init-method指定，两种方式可以同时使用。
 
 2、实现InitializingBean接口是直接调用afterPropertiesSet方法，比通过反射调用init-method指定的方法效率要高一点，但是init-method方式消除了对spring的依赖。
@@ -467,7 +395,7 @@ protected void addSingletonFactory(String beanName, ObjectFactory<?> singletonFa
 
 
 
-
+# 实际遇到问题
 
 
 

@@ -4,7 +4,7 @@
 
 三个重要概念
 
-- Channel
+- Channel
 
 - Buffer
 
