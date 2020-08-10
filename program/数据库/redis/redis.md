@@ -4,8 +4,6 @@
 
 
 
-[掘金--redis基础--敖丙]( https://juejin.im/post/5db69365518825645656c0de )
-
 
 
 传统的关系型数据库如Mysql已经不能适用所有的场景了，比如秒杀的库存扣减，APP首页的访问流量高峰等等，都很容易把数据库打崩，所以引入了缓存中间件，目前市面上比较常用的缓存中间件有 **Redis** 和 **Memcached** 不过中和考虑了他们的优缺点，最后选择了Redis。
@@ -24,13 +22,29 @@
 
 ## 数据结构
 
+
+
+![Redis 的数据架构](https://user-gold-cdn.xitu.io/2019/12/14/16f02142cb0c34a2)
+
+redis中value 都是以Object形式存在的，通用结构如下
+
+```
+typedef struct redisObject {
+    unsigned [type] 4;
+    unsigned [encoding] 4;
+    unsigned [lru] REDIS_LRU_BITS;
+    int refcount;
+    void *ptr;
+} robj;
+```
+
+- type：指类型，String、Hash、List、Set、ZSet；
+- encoding：类型具体的实现方式；比如 Set 是用 hashTable 实现还是 intSet 实现；
+- lru：最后一次被访问的信息，其实一看到 LRU 估计也就和淘汰策略有关；
+- refcount：对象引用计数；
+- ptr：指向实际实现者的地址；
+
 ### String
-
-简单get set
-
-```
-set college szu
-```
 
 
 

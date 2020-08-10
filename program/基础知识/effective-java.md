@@ -43,6 +43,29 @@ Calendar.getInstance();
 - newType —— 与 newInstance 类似，但是在工厂方法处于不同的类中的时候使用。newType中的 Type 是工厂方法返回的对象类型，例如：BufferedReader br = Files.newBufferedReader(path);
 - type —— getType 和 newType 简洁的替代方式，例如：List litany = Collections.list(legacyLitany);
 
+
+
+服务提供者框架（service provider fremework）
+
+JDBC（Java Database Connectivity） API就是服务提供这框架，指一个这样的系统：多个服务提供者实现一个服务，系统为服务提供者的客户端提供多个实现，并把他们从多个实现中解耦出来
+
+服务提供者框架中有三个重要的组件，第四个组件可选
+
+1. 服务提供者接口（service provider interface） 提供者实现的
+2. 提供者注册API（provider registration API）系统用来注册实现让客户端访问他们的
+3. 服务访问API（service access api）是客户端用来获取服务的实例的
+4. 服务提供者接口（servie provider interface）这些公共者负责创建其服务实现的实例
+
+
+
+重叠构造器模式， 参数多了，代码量就多了
+
+Builder模式比重叠构造器还要冗长
+
+
+
+终结方法守卫者（finalizer guardian）
+
 ### 2. 当构造方法参数过多时使用 builder 模式 ###
 
 ``` java
