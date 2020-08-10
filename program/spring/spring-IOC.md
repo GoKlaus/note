@@ -8,9 +8,9 @@
 
 Spring容器来实现对象的创建、协调工作
 
-![启动流程](/home/klaus/documents/pic/note/20190310122523469.png)
 
-![在这里插入图片描述](/home/klaus/documents/pic/note/20190310121611901.png)
+
+
 
 
 

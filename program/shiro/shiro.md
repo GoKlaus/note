@@ -6,7 +6,7 @@ Apache Shiro是Java的一个安全框架。目前，使用Apache Shiro的人越�
 
 Shiro可以非常容易的开发出足够好的应用，其不仅可以用在JavaSE环境，也可以用在JavaEE环境。Shiro可以帮助我们完成：认证、授权、加密、会话管理、与Web集成、缓存等。这不就是我们想要的嘛，而且Shiro的API也是非常简单；其基本功能点如下图所示：
 
-![shiro结构图](assets/d59f6d02-1f45-3285-8983-4ea5f18111d5.png)
+
 
 **Authentication：**身份认证/登录，验证用户是不是拥有相应的身份；
 
@@ -34,7 +34,7 @@ Shiro可以非常容易的开发出足够好的应用，其不仅可以用在Jav
 
 从外部来看Shiro吧，即从应用程序角度的来观察如何使用Shiro完成工作
 
-![img](assets/5e0e9b41-0cca-367f-8c87-a8398910e7a6.png)
+
 
 **Subject：**主体，代表了当前“用户”，这个用户不一定是一个具体的人，与当前应用交互的任何东西都是Subject，如网络爬虫，机器人等；即一个抽象概念；所有Subject都绑定到SecurityManager，与Subject的所有交互都会委托给SecurityManager；可以把Subject认为是一个门面；SecurityManager才是实际的执行者；
 
@@ -46,7 +46,7 @@ Shiro可以非常容易的开发出足够好的应用，其不仅可以用在Jav
 
 > shiro内部架构图：
 
-![img](assets/9b959a65-799d-396e-b5f5-b4fcfe88f53c.png)
+
 
 **Subject：**主体，可以看到主体可以是任何可以与应用交互的“用户”；
 
@@ -91,7 +91,7 @@ Shiro可以非常容易的开发出足够好的应用，其不仅可以用在Jav
 
 **Subject**及**Realm**，分别是主体及验证主体的数据源。
 
-![img](assets/8d639160-cd3e-3b9c-8dd6-c7f9221827a5.png)
+
 
 ### 2.2.1  Realm
 
@@ -99,7 +99,7 @@ Realm：域，Shiro从Realm获取安全数据（如用户、角色、权限）�
 
 ####  Shiro默认提供的Realm
 
-![img](assets/34062d4e-8ac5-378a-a9e2-4845f0828292.png)
+
 
 **org.apache.shiro.realm.text.IniRealm：**[users]部分指定用户名/密码及其角色；[roles]部分指定角色即权限信息；
 

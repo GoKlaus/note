@@ -10,10 +10,6 @@
 
 ## Spring流程
 
-![img](/home/klaus/documents/pic/note/1365825529_4693.png)
-
-![img](/home/klaus/documents/pic/note/1365825551_8302.png)
-
 ### Spring工作流程描述
 
 1. 用户向服务器发送请求，请求被Spring 前端控制Servelt DispatcherServlet捕获；
@@ -40,10 +36,6 @@
    b、创建一个ServletContext（Servlet上下文）这个上下文供所有部分共享
    c、容器将context-param转换成键值对，交给ServletContext
    d、接着按照上述顺序继续执行
-
-![img](/home/klaus/documents/pic/note/16787cb36ca9e2dd)
-
-![img](/home/klaus/documents/pic/note/1678bc7b61df1c4f)
 
 **加载顺序** 
 a、首先加载Spring容器加载器：ContextLoaderListener
@@ -385,6 +377,27 @@ protected void addSingletonFactory(String beanName, ObjectFactory<?> singletonFa
 
 ## 构造器参数循环依赖
 
+```java
+class A {
+  private B b;
+  
+  public A (B b) {
+    this.b = b;
+  }
+}
+
+class B {
+  private A a;
+  
+  public B (A a) {
+    this.a = a;
+  }
+}
+//循环依赖实例化错误
+```
+
+
+
 
 
 ## setter方式单例
@@ -396,6 +409,50 @@ protected void addSingletonFactory(String beanName, ObjectFactory<?> singletonFa
 
 
 # 实际遇到问题
+
+
+
+
+
+基于事件驱动
+
+@EventListener
+
+例子
+
+```java
+class EventPublish implements ApplicationContextAware {
+  
+  private ApplicationContext ctx;
+  
+  @Override
+  public void setApplicationContext(ApplicationContext ctx) {
+    this.ctx = ctx;
+  }
+  
+  public void publishEvent(int status, String msg) {
+    if (status == 0) {
+      ctx.publishEvent(new ApplicationEvent(this, msg));
+    } else {
+      ctx.publishEvent(....)
+    }
+  }
+}
+
+@Component
+public class NotifyQueueListener {
+
+    @EventListener
+    public void consumerA(ApplicationEvent notifyEvent) {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("A: " + Thread.currentThread().getName() + " | " + notifyEvent.getMsg());
+    }
+}
+```
 
 
 

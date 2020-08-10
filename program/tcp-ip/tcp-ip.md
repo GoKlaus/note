@@ -109,7 +109,7 @@
 
 TCP/IP
 
-![](http://klaus_project.gitee.io/pic/note/20190312122557.jpg)
+
 
 
 
