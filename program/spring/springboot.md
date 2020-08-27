@@ -89,8 +89,6 @@ application-{profile}.properties
 
 可以通过--spring.profiles.active=xxx来指定
 
-![image-20191224160712396](springboot.assets/image-20191224160712396.png)
-
 java -jar --spring.profile.active=xxx    xxx.jar
 
 java -jar -Dspring.profile.active=xxx xxx.jar

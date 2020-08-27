@@ -79,7 +79,15 @@ public EurekaInstanceConfigBean eurekaInstanceConfig() {
 
 ## Hytrix
 
-有什么概念？
+
+
+
+
+分布式系统中不可避免的会出现调用链上的错误
+
+错误隔离
+
+
 
 服务熔断
 

@@ -400,11 +400,21 @@ class B {
 
 
 
-## setter方式单例
+## setter方式单例模式
+
+全局实例化一次
+
+## setter方式原型模式，prototype
+
+每次创建都需要实例化
 
 
 
-## setter方式原型，prototype
+## 过滤器
+
+```java
+OncePerRequestFilter
+```
 
 
 
