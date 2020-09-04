@@ -4,10 +4,47 @@
 
 ## Stream编程
 
+Collector接口
+
 ```java
-list.stream().filter();
-list.stream().map();
+Supplier<A> supplier(); //提供一个Supplier 函数
+BiConsumer<A, T> accumulator(); // 提供一个 BiConsumer 函数
+BinaryOperator<A> combiner(); // 提供一个BinaryOperator 函数
+Function<A, R> finisher(); // 提供一个 Function 函数
+Set<Characteristics> characteristics();
 ```
+
+Collectors类
+
+提供一个Collector接口的实现类
+
+```java
+static class CollectorImpl<T, A, R> implements Collector<T, A, R> 
+```
+
+并且Collector接口提供静态方法
+
+```java
+public interface Collector {
+  
+  public static<T, R> Collector<T, R, R> of(Supplier<R> supplier,
+                                              BiConsumer<R, T> accumulator,
+                                              BinaryOperator<R> combiner,
+                                              Characteristics... characteristics) {
+        Objects.requireNonNull(supplier);
+        Objects.requireNonNull(accumulator);
+        Objects.requireNonNull(combiner);
+        Objects.requireNonNull(characteristics);
+        Set<Characteristics> cs = (characteristics.length == 0)
+                                  ? Collectors.CH_ID
+                                  : Collections.unmodifiableSet(EnumSet.of(Collector.Characteristics.IDENTITY_FINISH,
+                                                                           characteristics));
+        return new Collectors.CollectorImpl<>(supplier, accumulator, combiner, cs);
+    }
+}
+```
+
+
 
 
 
