@@ -2,9 +2,19 @@ v-if
 
 v-show
 
-v-bind
+v-bind 单向绑定
 
-v-model
+v-model 双向绑定
+
+
+
+
+
+
+
+
+
+
 
 
 
