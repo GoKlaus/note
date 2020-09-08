@@ -1144,7 +1144,7 @@ HashMap就是使用对象的hashCode进行快速查询的。此方法能够显�
 # 20.注解
 # 21.并发
 
-### JMM
+## JMM
 
 JMM(Java Memory Model,JMM)：Java虚拟机规范中定义了Java内存模型（Java Memory Model，JMM），用于==屏蔽掉各种硬件和操作系统的内存访问差异==，以实现让Java程序在各种平台下都能达到一致的并发效果，JMM规范了Java虚拟机与计算机内存是如何协同工作的：规定了一个线程如何和何时可以看到由其他线程修改过后的共享变量的值，以及在必须时如何同步的访问共享变量。
 
@@ -1152,9 +1152,7 @@ JMM(Java Memory Model,JMM)：Java虚拟机规范中定义了Java内存模型（J
 
 Java内存模型（不仅仅是JVM内存分区）：调用栈和本地变量存放在线程栈上，对象存放在堆上。
 
-![img](assets/v2-bd607bd9a5598a8330ad329033e04b91_r.jpg)
 
-![img](assets/v2-a1a75c9f7264cf78d0927663371ca9d2_r.jpg)
 
 - 一个本地变量可能是原始类型，在这种情况下，它总是“呆在”线程栈上。
 

@@ -204,15 +204,13 @@ public @interface Configuration {
 
 ## 加载过程
 
-==~~~这里也不太懂==
+BeanDefinition 接口，描述一个bean实例的借口，里面包含了属性值，构造参数和其他的具体信息
 
-PostProcessor？？？
 
-postProcessBeanFactory？？？
 
 Spring 容器在启动时，会加载默认的一些 PostPRocessor，其中就有 ConfigurationClassPostProcessor，这个后置处理程序专门处理带有 @Configuration 注解的类，这个程序会在 bean 定义加载完成后，在 bean 初始化前进行处理。主要处理的过程就是使用 cglib 动态代理增强类，而且是对其中带有 @Bean 注解的方法进行处理。
 
-在 ConfigurationClassPostProcessor 中的 postProcessBeanFactory 方法中调用了下面的方法：
+
 
 
 
