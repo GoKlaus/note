@@ -223,6 +223,26 @@ class AuthorizorClientFallBack implements FallbackFactory<AuthorizorClient>, Req
 
 
 
+spi思想
 
 
-# springboot 配置Multipartfile
+
+
+
+@Conditional
+
+生效原理
+
+
+
+```java
+@Order(Ordered.HIGHEST_PRECEDENCE + 40)
+class OnPropertyCondition extends SpringBootCondition {
+    
+}
+```
+
+
+
+@ConditionalOnProperty
+
