@@ -8,7 +8,9 @@
 
 ----- `Brian Goetz 《Java并发编程实战（Java Concurrency In Practice）》`
 
+## 线程
 
+线程是操作系统进行运算调度的最小单元，被包涵在进程之内，是进程的实际运作单位
 
 # Java的多线程技能
 
