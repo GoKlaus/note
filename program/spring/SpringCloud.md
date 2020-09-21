@@ -21,6 +21,176 @@ spring.cloud.bootstrap.enabled=false
 
 
 
+[toc]
+
+
+
+1. 服务发现--eureka
+2. 断路器--hytrix
+3. 智能路由--zuul
+4. 负载均衡--ribbon
+
+eureka保证高可用：eureka server之间复制同步注册的服务
+
+为什么说eureka比zookeeper更适合作为注册中心呢？
+
+eureka是基于AP原则的，zookeeper是基于CP原则的
+
+eureka 配置主要分三个模块的：
+
+- server
+- client
+- instance
+
+server配置
+
+```yml
+
+```
+
+client 配置
+
+```yml
+
+```
+
+
+
+
+
+
+
+client的心跳机制，默认心跳时间30s
+
+```
+Being an instance also involves a periodic heartbeat to the registry (via the client’s serviceUrl) with default duration 30 seconds
+```
+
+
+
+服务状态页面和指示页面
+
+```yml
+eureka:
+  instance:
+    hostname: localhost
+    instance-id: http://${eureka.instance.hostname}:${server.port}
+#    默认/actuator/info
+    status-page-url-path: ${management.contextPath}/info
+#    默认/actuator/health
+    health-check-url-path: ${management.contextPath}/health
+```
+
+
+
+在aws上使用eureka
+
+定制[EurekaInstanceConfigBean](https://github.com/spring-cloud/spring-cloud-netflix/tree/master/spring-cloud-netflix-eureka-client/src/main/java/org/springframework/cloud/netflix/eureka/EurekaInstanceConfigBean.java)
+
+```java
+@Bean
+@Profile("!default")
+public EurekaInstanceConfigBean eurekaInstanceConfig() {
+  EurekaInstanceConfigBean b = new EurekaInstanceConfigBean();
+  AmazonInfo info = AmazonInfo.Builder.newBuilder().autoBuild("eureka");
+  b.setDataCenterInfo(info);
+  return b;
+}
+```
+
+
+
+# Hytrix
+
+
+
+## 服务熔断
+
+分布式系统中不可避免的会出现调用链上的错误，分布式集群情况下也会出现波动情况，在调用provider服务时频繁出现超时，服务调用失败等情况，不妨碍调用链上有服务状态，直接短路掉，不调用实际服务，直接返回一个mock值
+
+## 
+
+## 服务降级
+
+资源有限情况下，保证核心业务的处理能力，梳理业务，降低或者关闭不重要业务
+
+降级的实现方式：
+
+可以业务代码中设计开关
+
+配置中心模式
+
+## 服务限流
+
+对并发访问进行限速
+
+**限流的实现方式**
+
+信号
+
+
+
+线程池
+
+**限流有哪些行为**
+
+**拒绝服务**
+
+最简单的方式，把多余的请求直接拒绝掉
+
+做的高大上一些，可以根据一定的用户规则进行拒绝策略。
+
+**服务降级**
+
+降级甚至关掉后台的某些服务。
+
+**特权请求**
+
+在多租户或者对用户进行分级时，可以考虑让一些特殊的用户有限处理，其他的可以考虑干掉
+
+**延时处理**
+
+可以利用队列把请求缓存住。削峰填谷。
+
+
+
+**限流的一些注意点**
+
+限流越早设计约好，架构成型后，不容易加入
+
+限流模块不要成为系统的瓶颈，性能要求高
+
+最好有个开关，可以直接介入
+
+限流发生时，能及时发出通知事件
+
+限流发生时，给用户提供友好的提示 。
+
+
+
+ **三者的关系**
+
+熔断强调的是服务之间的调用能实现自我恢复的状态；
+
+限流是从系统的流量入口考虑，从进入的流量上进行限制，达到保护系统的作用；
+
+降级，是从系统内部的平级服务或者业务的维度考虑，流量大了，可以干掉一些，保护其他正常使用；
+
+
+熔断是降级方式的一种；
+
+降级又是限流的一种方式；
+
+三者都是为了通过一定的方式去保护流量过大时，保护系统的手段。
+
+
+
+错误隔离
+
+
+
+
+
 
 
 

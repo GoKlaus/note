@@ -62,6 +62,60 @@ c、加载Servlet：初始化DispatcherServlet，在SpringMVC架构中，Dispatc
 
 使用了thymeleaf所以，使用mvc的自然是无用的，必须要修改为thymeleaf才行
 
+[toc]
+
+
+
+
+
+# IOC
+
+Spring容器来实现对象的创建、协调工作
+
+
+
+## BeanDefinition、BeanDefinitionRegistry、BeanDefinitionReader
+
+
+
+![BeanDefinition的类体系结构](https://img-blog.csdn.net/20160622214621888)
+
+
+
+
+
+![这里写图片描述](https://img-blog.csdn.net/20160621211340852)
+
+
+
+AbstractBeanDefinitionReader：实现了EnvironmentCapable，提供了获取/设置环境的方法。定义了一些通用方法，使用***策略模式\***，将一些具体方法放到子类实现。
+**XmlBeanDefinitionReader**：读取XML文件定义的BeanDefinition
+**PropertiesBeanDefinitionReader**：可以从属性文件，Resource，Property对象等读取BeanDefinition
+**GroovyBeanDefinitionReader**：可以读取Groovy语言定义的Bean
+
+BeanDefinitionRegistry 接受BeanDefinition的注册维护
+
+BeanDefinitionReader 可以从Xml Properites 注解中解析BeanDefinition 并注册到BeanDefinitionRegistry
+
+
+
+
+
+简单分类如下：
+
+- 工厂后置处理器（BeanFactoryPostProcessor）：这个包括了AspectJWeavingEnabler, ConfigurationClassPostProcessor, CustomAutowireConfigurer等等非常有用的工厂后处理器接口的方法。工厂后处理器也是容器级的。
+- 容器级别生命周期处理器：包括了InstantiationAwareBeanPostProcessor 和 BeanPostProcessor 这两个接口实现，一般称它们的实现类为“后处理器”
+- Bean级生命周期接口方法（仅作用于某个Bean）：这个包括了BeanNameAware、BeanFactoryAware、InitializingBean和DiposableBean这些接口的方法
+- Bean自身的方法：这个包括了Bean本身调用的方法和通过配置文件中<bean>的init-method和destroy-method指定的方法
+
+
+
+
+
+**在`spring ioc`的过程中，优先解析`@Component，@Service，@Controller`注解的类。其次解析配置类，也就是`@Configuration`标注的类。最后开始解析配置类中定义的`bean`。** 
+
+
+
 
 
 
@@ -464,3 +518,128 @@ public class NotifyQueueListener {
 
 
 
+
+
+# 多数据源
+
+## 多数据源读写分离
+
+```java
+import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
+
+import javax.sql.DataSource;
+import java.util.Map;
+
+/**
+ * 动态数据源
+ * @author 
+ * @date 2019/8/19 1:03
+ */
+public class DynamicDataSource extends AbstractRoutingDataSource {
+    private static final ThreadLocal<String> CONTEXT_HOLDER = new ThreadLocal<>();
+
+    public DynamicDataSource(DataSource defaultTargetDataSource, Map<Object, Object> targetDataSources) {
+        super.setDefaultTargetDataSource(defaultTargetDataSource);
+        super.setTargetDataSources(targetDataSources);
+        super.afterPropertiesSet();
+    }
+
+    @Override
+    protected Object determineCurrentLookupKey() {
+        return getDataSource();
+    }
+
+    public static void setDataSource(String dataSource) {
+        CONTEXT_HOLDER.set(dataSource);
+    }
+
+    public static String getDataSource() {
+        return CONTEXT_HOLDER.get();
+    }
+
+    public static void clearDataSource() {
+        CONTEXT_HOLDER.remove();
+    }
+
+}	
+
+
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface DataSource {
+    String name() default "";
+}
+
+import com.chinamobile.iot.east.common.auth.datasource.DynamicDataSource;
+import com.chinamobile.iot.east.common.util.DataSourceNames;
+import com.chinamobile.iot.east.common.util.annotations.DataSource;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
+import org.springframework.stereotype.Component;
+
+import java.lang.reflect.Method;
+
+/**
+ * 多数据源，切面处理类
+ * @author zpc
+ * @date 2017/9/16 22:20
+ */
+@Aspect
+@Component
+public class DataSourceAspect implements Ordered {
+    protected Logger logger = LoggerFactory.getLogger(getClass());
+
+    @Pointcut("@annotation(com.chinamobile.iot.east.common.util.annotations.DataSource)")
+    public void dataSourcePointCut() {
+
+    }
+
+    @Around("dataSourcePointCut()")
+    public Object around(ProceedingJoinPoint point) throws Throwable {
+        MethodSignature signature = (MethodSignature) point.getSignature();
+        Method method = signature.getMethod();
+
+        DataSource ds = method.getAnnotation(DataSource.class);
+        if(ds == null){
+            DynamicDataSource.setDataSource(DataSourceNames.MASTER);
+            logger.debug("set datasource is " + DataSourceNames.MASTER);
+        }else {
+            DynamicDataSource.setDataSource(ds.name());
+            logger.debug("set datasource is " + ds.name());
+        }
+
+        try {
+            return point.proceed();
+        } finally {
+            DynamicDataSource.clearDataSource();
+            logger.debug("clean datasource");
+        }
+    }
+
+    @Override
+    public int getOrder() {
+        return 1;
+    }
+}
+```
+
+
+
+# JPA
+
+
+
+使用jpa的ddl update时候指定方言
+
+```properties
+database-platform: org.hibernate.dialect.MySQL5Dialect
+```
+
+java持久化接口规范

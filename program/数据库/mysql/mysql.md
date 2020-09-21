@@ -1,28 +1,8 @@
 [TOC]
 
-# MySql 体系结构图
-
-![img](https://img2018.cnblogs.com/blog/403167/201901/403167-20190116145915277-683033214.jpg)
-
-连接池技术
-
-管理服务和工具组件
-
-sql接口组件
-
-查询分析器组件
-
-优化器组件
-
-缓冲组件
-
-插件式存储引擎
-
-物理文件
 
 
 
-## 通用
 
 ### CURD
 
@@ -144,10 +124,6 @@ CREATE TABLE `sys_area`
 
 
 
-索引使用的限制条件有哪些
-
-
-
 ### Btree索引中的最左匹配原则
 
 Btree是按照从左到右的顺序来建立搜索树的。比如索引是(name,age,sex)，会先检查name字段，如果name字段相同再去检查后两个字段。
@@ -224,9 +200,9 @@ handler_read_rnd_next:这个值越高，说明查询低效
 
 18,not in ,not exist. 
 
-19,当变量采用的是times变量，而表的字段采用的是date变量时.或相反情况。 
+19,当变量采用的是times变量，而表的字段采用的是date变量时或相反情况。 
 
-20,B-tree索引 is null不会走,is not null会走,位图索引 is null,is not null 都会走 
+20,B-tree索引 is null不会走,is not null会走，位图索引 is null,is not null 都会走 
 
 21,联合索引 is not null 只要在建立的索引列（不分先后）都会走, in null时 必须要和建立索引第一列一起使用,当建立索引第一位置条件是is null 时,其他建立索引的列可以是is null（但必须在所有列 都满足is null的时候）,或者=一个值； 当建立索引的第一位置是=一个值时,其他索引列可以是任何情况（包括is null =一个值）,以上两种情况索引都会走。其他情况不会走。
 
@@ -342,13 +318,13 @@ create table if not exists t_stuinfo(
 4     );
 ```
 
-　　2.修改表时设置标识列
+2.修改表时设置标识列
 
 ```sql
 1     alter table 表名称 modify column id int primary key auto_increment;
 ```
 
-　　3.修改表时删除标识列
+3.修改表时删除标识列
 
 ```sql
 1 alter table 表名称 modify column id int primary key;
@@ -480,6 +456,12 @@ transaction-isolation = {READ-UNCOMMITTED | READ-COMMITTED | REPEATABLE-READ | S
 简单一次事务中同样的查询条件，查询的结果第二次比第一次多，针对insert操作
 
 不可重复读与幻读好像好类似，但其实它们是有很大的不同，不可重复读主要体现在update与delete，而幻读主要体现在insert，从实现层面上讲，要解决不可重复读，我们只需要对查询的数据进行加锁就可以实现，此时update与delete这些行都会阻塞等待，但是insert依旧可以，避免不了幻读，而要解决幻读，必须对其行与行之前也加锁，在mysql中，是通过next key lock（行锁+gap lock）来实现的。
+
+
+
+不可重复读发生在update 和 delete  
+
+幻读发生在insert 情形下
 
 
 
@@ -902,7 +884,9 @@ DELIMITER ;
 
 # value 和 values
 
+**插入单行** 的时候使用VALUES，在 **插入多行** 的时候使用VALUE 这样比较快一点
 
+这个value表现和数量的表现是相反的，单数复数
 
 # 临时表
 
@@ -970,8 +954,6 @@ insert into sys_role_access(`id`, role_id, access_id, create_user_id, modify_use
 
 
 
-# 
-
 
 
 # sql优化措施
@@ -980,7 +962,6 @@ insert into sys_role_access(`id`, role_id, access_id, create_user_id, modify_use
 2. 应尽量避免在 where 子句中使用!=或<>（不等于）操作符，否则将引擎放弃使用索引而进行全表扫描。
 3. 应尽量避免在 where 子句中对字段进行 null 值判断，否则将导致引擎放弃使用索引而进行全表扫描。可以设置默认值，避免使用null
 4. 左模糊查询"%--"是无法使用索引的，右模糊会走索引
-5. 
 
 
 

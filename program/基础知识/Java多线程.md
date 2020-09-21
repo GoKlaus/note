@@ -465,9 +465,9 @@ W/C等待时间和计算时间比率
 
 # Callable
 
-ExecutorService.submit 可以来执行这个接口
+`ExecutorService.submit` 可以来执行这个接口
 
-底层的还是使用Runable吗？
+底层的还是使用`Runable`吗？
 
 
 
@@ -475,11 +475,10 @@ ExecutorService.submit 可以来执行这个接口
 
 ```java
 Instant start = Instant.now();
-        long result = LongStream.rangeClosed(0, 10000000L).parallel().reduce(0, Long::sum);
-        Instant end = Instant.now();
-        System.out.println("耗时：" + Duration.between(start, end).toMillis() + "ms");
-
-        System.out.println("结果为：" + result);
+long result = LongStream.rangeClosed(0, 10000000L).parallel().reduce(0, Long::sum);
+Instant end = Instant.now();
+System.out.println("耗时：" + Duration.between(start, end).toMillis() + "ms");
+System.out.println("结果为：" + result);
 ```
 
 耗时效率方面解释：Fork/Join 并行流等当计算的数字非常大的时候，优势才能体现出来。计算比较小，或者不是CPU密集型的任务，不建议使用并行处理
@@ -503,4 +502,4 @@ Fork/join Fremework 底层使用到了work stealing 算法
 
 一个单核心的cpu，无论何时都是只有一个线程在运行，体现出多线程在运行的现象是因为时间切片的存在，cpu不会空闲
 
-IPC（Inter Process Communication) resource 
+IPC（Inter Process Communication) resource  
