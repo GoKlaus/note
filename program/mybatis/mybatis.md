@@ -80,3 +80,6 @@ select * from xxx where username = admin or 1 = 1 # and password = 111;
 # '#'在sql语句中是注释，将后面密码的验证去掉了，而前面的条件中1 = 1始终成立，所以不管密码正确与否，都能登录成功
 ```
 
+
+
+在spring框架集成使用方式下，是通过MapperProxy来动态代理的

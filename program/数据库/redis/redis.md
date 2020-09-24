@@ -201,6 +201,100 @@ Redis-ML
 
 
 
+**通过synchronized+双重检查机制：某个key只让一个线程查询，阻塞其它线程**
+
+```java
+private static volaite Object lockHelp=new Object();
+
+  public String getValue(String key){
+    String value=redis.get(key,String.class);
+    if(value=="null"||value==null||StringUtils.isBlank(value){
+        synchronized(lockHelp){
+               value=redis.get(key,String.class);
+                if(value=="null"||value==null||StringUtils.isBlank(value){
+                    value=db.query(key);
+                     redis.set(key,value,1000);
+                 }
+           }
+          }    
+       return value;
+  }
+//缺点：会阻塞其它线程
+```
+
+
+
+**设置value永不过期**
+
+**使用互斥锁(mutex key**)
+
+set if not exist
+
+```java
+public String get(key) {
+      String value = redis.get(key);
+      if (value == null) { //代表缓存值过期
+          //设置3min的超时，防止del操作失败的时候，下次缓存过期一直不能load db
+          if (redis.setnx(key_mutex, 1, 3 * 60) == 1) {  //代表设置成功
+               value = db.get(key);
+                      redis.set(key, value, expire_secs);
+                      redis.del(key_mutex);
+
+                     return value;
+              } else {  //这个时候代表同时候的其他线程已经load db并回设到缓存了，这时候重试获取缓存值即可
+                      sleep(10);
+                      get(key);  //重试
+              }
+          } else {
+              return value;      
+          }
+
+}
+
+/**缺点:
+
+1. 代码复杂度增大
+
+2. 存在死锁的风险
+
+3. 存在线程池阻塞的风险*/
+```
+
+
+
+
+
+##  雪崩
+
+雪崩指的是**多个key**查询并且出现**高并发**，缓存中失效或者查不到，然后都去db查询，从而导致db压力突然飙升，从而崩溃。
+
+出现原因: 1 key同时失效
+
+​         2 redis本身崩溃了
+
+方案:
+
+1. 在缓存失效后，通过加锁或者队列来控制读数据库写缓存的线程数量。比如对某个key只允许一个线程查询数据和写缓存，其他线程等待。(跟击穿的第一个方案类似，但是这样是避免不了其它key去查数据库，只能减少查询的次数)
+2. 可以通过缓存reload机制，预先去更新缓存，再即将发生大并发访问前手动触发加载缓存
+3. 不同的key，设置不同的过期时间，具体值可以根据业务决定，让缓存失效的时间点尽量均匀
+4. 做二级缓存，或者双缓存策略。A1为原始缓存，A2为拷贝缓存，A1失效时，可以访问A2，A1缓存失效时间设置为短期，A2设置为长期。(这种方式复杂点)
+
+
+
+
+
+## 击透
+
+  一般是出现这种情况是因为恶意频繁查询才会对系统造成很大的问题: key缓存并且数据库不存在，所以每次查询都会查询数据库从而导致数据库崩溃。
+
+解决方案：
+
+布隆过滤器，
+
+
+
+
+
 ## 持久化
 
 因为**Redis**数据在内存的特性，持久化必须得有

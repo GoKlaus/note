@@ -479,6 +479,19 @@ transaction-isolation = {READ-UNCOMMITTED | READ-COMMITTED | REPEATABLE-READ | S
 - 可重复读(Repeated Read)：可重复读。在同一个事务内的查询都是事务开始时刻一致的，InnoDB默认级别。在SQL标准中，该隔离级别消除了不可重复读，但是还存在幻象读
 - 串行读(Serializable)：完全串行化的读，每次读都需要获得表级共享锁，读写相互都会阻塞
 
+
+
+mysql默认隔离级别是可重复读
+
+```sql
+> SELECT @@tx_isolation;  --mysql 查询隔离级别
+> REPEATABLE-READ 
+```
+
+
+
+
+
 ```sql
 --事务的使用
 -- 开启事务

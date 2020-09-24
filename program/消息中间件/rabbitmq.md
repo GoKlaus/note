@@ -104,7 +104,7 @@ RabbitMQ 是一个开源的 AMQP 实现，服务器端用Erlang语言编写，�
 
 通常我们谈到队列服务, 会有三个概念： 发消息者、队列、收消息者，RabbitMQ 在这个基本概念之上, 多做了一层抽象, 在发消息者和 队列之间, 加入了交换器 (Exchange). 这样发消息者和队列就没有直接联系, 转而变成发消息者把消息给交换器, 交换器根据调度策略再把消息再给队列。
 
-![](http://klaus_project.gitee.io/pic/note/RabbitMQ01.png)
+![img](https://www.rabbitmq.com/img/tutorials/python-one-overall.png)
 
 - 左侧 P 代表 生产者，也就是往 RabbitMQ 发消息的程序。
 - 中间即是 RabbitMQ，*其中包括了 交换机 和 队列。*
@@ -388,7 +388,7 @@ Why don't we use a try-with-resource statement to automatically close the channe
 
 轮询分发依次分发C1，C2，C3.......，然后继续新的回合
 
- 采用的是轮巡制（不会因某个消费者上的任务执行时间过长，导致消息会传递到其它消费者上处理）
+ 采用的是轮询制（不会因某个消费者上的任务执行时间过长，导致消息会传递到其它消费者上处理）
 
 ## Message acknowledgment
 
@@ -452,7 +452,7 @@ channel.basicPublish("", "task_queue", MessageProperties.PERSISRENT_TEST_PLAIN, 
 
 tip:
 
-昨晚以上两步设置，还不能完全保证持久化消息，mq不是对所有的消息执行`fsync(2)`方法，可能存在缓存中，并不是存在硬盘上，如果需要更强的保证，可以使用发布确认（[publisher confirms](https://www.rabbitmq.com/confirms.html)）机制
+做完以上两步设置，还不能完全保证持久化消息，mq不是对所有的消息执行`fsync(2)`方法，可能存在缓存中，并不是存在硬盘上，如果需要更强的保证，可以使用发布确认（[publisher confirms](https://www.rabbitmq.com/confirms.html)）机制
 
 ## Fair dispatch
 
