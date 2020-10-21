@@ -83,3 +83,46 @@ select * from xxx where username = admin or 1 = 1 # and password = 111;
 
 
 在spring框架集成使用方式下，是通过MapperProxy来动态代理的
+
+
+
+
+
+
+
+JDBC（Java Database Connectivity）是Java语言中提供的访问关系型数据的接口。在Java编写的应用中，使用JDBC API可以执行SQL语句、检索SQL执行结果以及将数据更改写回到底层数据源。JDBC API也可以用于分布式、异构的环境中与多个数据源交互。
+
+JDBC API基于X/Open SQL CLI，是ODBC的基础。JDBC提供了一种自然的、易于使用的Java语言与数据库交互的接口。自1997年1月Java语言引入JDBC规范后，JDBC API被广泛接受，并且广大数据库厂商开始提供JDBC驱动的实现。JDBC API为Java程序提供了访问一个或多个数据源的方法。
+
+在大多数情况下，数据源是关系型数据库，它的数据是通过SQL语句来访问的。当然，**使用JDBC访问其他数据源（例如文件系统或者面向对象系统等）也是有可能的**，只要该数据源提供JDBC规范驱动程序即可。
+
+使用JDBC操作数据源大致需要以下几个步骤：
+
+（1）与数据源建立连接。
+
+（2）执行SQL语句。
+
+（3）检索SQL执行结果。
+
+（4）关闭连接。
+
+
+
+DriverManager
+
+
+
+DataSource
+
+JDBC API中定义了两个DataSource接口比较重要的扩展，用于支撑企业级应用。这两个接口分别为：ConnectionPoolDataSource　支持缓存和复用Connection对象，这样能够在很大程度上提升应用性能和伸缩性。XADataSource　该实例返回的Connection对象能够支持分布式事务
+
+更多关于分布式事务相关细节可参考JTA（Java Transaction API）规范文档
+
+DatabaseMetadata
+
+使用DatabaseMetadata的实例来确定目前使用的数据源是否支持某一特性，不同的JDBC厂商对这些特性的支持程度各不相同
+
+
+
+== JDBC API由java.sql和javax.sql两个包构成 ==
+
