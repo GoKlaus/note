@@ -89,7 +89,6 @@ select * from xxx where username = admin or 1 = 1 # and password = 111;
 
 
 
-
 JDBC（Java Database Connectivity）是Java语言中提供的访问关系型数据的接口。在Java编写的应用中，使用JDBC API可以执行SQL语句、检索SQL执行结果以及将数据更改写回到底层数据源。JDBC API也可以用于分布式、异构的环境中与多个数据源交互。
 
 JDBC API基于X/Open SQL CLI，是ODBC的基础。JDBC提供了一种自然的、易于使用的Java语言与数据库交互的接口。自1997年1月Java语言引入JDBC规范后，JDBC API被广泛接受，并且广大数据库厂商开始提供JDBC驱动的实现。JDBC API为Java程序提供了访问一个或多个数据源的方法。
@@ -124,5 +123,46 @@ DatabaseMetadata
 
 
 
-== JDBC API由java.sql和javax.sql两个包构成 ==
+==JDBC API由java.sql和javax.sql两个包构成==
 
+
+
+## Statement 接口
+
+Statement接口及它的子接口PreparedStatement和CallableStatement
+
+Statement接口中定义了执行SQL语句的方法，这些方法不支持参数输入
+
+PreparedStatement接口中增加了设置SQL参数的方法
+
+CallableStatement接口继承自PreparedStatement，在此基础上增加了调用存储过程以及检索存储过程调用结果的方法
+
+
+
+
+
+事务中的保存点
+
+保存点通过在事务中标记一个中间的点来对事务进行更细粒度的控制，一旦设置保存点，事务就可以回滚到保存点，而不影响保存点之前的操作。DatabaseMetaData接口提供了supportsSavepoints()方法，用于判断JDBC驱动是否支持保存点。
+
+
+
+
+
+SQL类用于在Java代码中动态构建SQL语句
+
+SqlRunner和ScriptRunner在MyBatis源码测试用例中出现的频率较高，用于执行SQL脚本和SQL语句
+
+MetaObject和MetaClass是MyBatis中的反射工具类，封装了对类和对象的操作
+
+ObjectFactory和ProxyFactory是对象创建相关的工具类
+
+ObjectFactory用于创建Mapper映射实体对象
+
+ProxyFactory则用于创建Mapper映射实体对象的动态代理对象，通过动态代理来实现MyBatis中的懒加载机制
+
+
+
+
+
+SqlSession是MyBatis中提供的与数据库交互的接口，SqlSession实例通过工厂模式创建
