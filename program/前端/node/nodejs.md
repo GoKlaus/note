@@ -21,3 +21,8 @@ Node.js 使用事件驱动模型，当web server接收到请求，就把它关�
 在事件驱动模型中，会生成一个主循环来监听事件，当检测到事件时触发回调函数。
 
 ![img](https://www.runoob.com/wp-content/uploads/2015/09/event_loop.jpg)
+
+
+
+
+

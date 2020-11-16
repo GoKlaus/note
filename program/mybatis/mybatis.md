@@ -29,6 +29,24 @@
 
 
 
+
+
+在分布式环境下，务必将MyBatis的localCacheScope属性设置为STATEMENT，避免其他应用节点执行SQL更新语句后，本节点缓存得不到刷新而导致的数据一致性问题
+
+```java
+public enum LocalCacheScope {
+  /**
+   *
+   */
+  SESSION,
+
+  /**
+   * 每次都会清除缓存
+   */
+  STATEMENT
+}
+```
+
 # 实际遇到问题
 
 jar包中的mapper.xml文件加载
@@ -36,24 +54,6 @@ jar包中的mapper.xml文件加载
 用 classpath 和 classpath*的区别来完成
 
 
-
-if test 判断list 是否空
-
-```xml
-<!-- -->
-<if test="list!=null and list.size()!=0">
-</if>
-```
-
-
-
-if test 判断str 
-
-```xml
-<if test="type!=null and type!=''">  
-    AND type = #{type}  
-</if> 
-```
 
 
 
@@ -83,8 +83,6 @@ select * from xxx where username = admin or 1 = 1 # and password = 111;
 
 
 在spring框架集成使用方式下，是通过MapperProxy来动态代理的
-
-
 
 
 

@@ -469,3 +469,12 @@ snapshots包强制更新: mvn package -u
 mvn dependency:get -DremoteRepositories=http://repo1.maven.org/maven2/ -DgroupId=junit -DartifactId=junit -Dversion=4.8.2
 ```
 
+
+
+## 直接将Jar包本地命令行打入本地仓
+
+```sh
+
+mvn install:install-file -DgroupId=com.hypersmart -DartifactId=ibe2 -Dversion=1.1.0-SNAPSHOT -Dpackaging=jar -Dfile=C:\Users\Einyun\Downloads\i18n-1.1.0-SNAPSHOT.jar 
+```
+

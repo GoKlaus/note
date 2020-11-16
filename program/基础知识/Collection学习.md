@@ -76,6 +76,84 @@ treeify = 8
 
 ```
 
+## LinkedHashMap
+
+```java
+LinkedHashMap extends HashMap implements Map
+```
+
+
+
+accessOrder属性
+
+- true  顺序会根据获取而改动
+- false 默认的，插入顺序
+
+
+
+```java
+/**
+ * HashMap.Node subclass for normal LinkedHashMap entries.
+ */
+static class Entry<K,V> extends HashMap.Node<K,V> {
+    Entry<K,V> before, after;
+    Entry(int hash, K key, V value, Node<K,V> next) {
+        super(hash, key, value, next);
+    }
+}
+
+/**
+     * The head (eldest) of the doubly linked list.
+     */
+    transient LinkedHashMap.Entry<K,V> head;
+
+    /**
+     * The tail (youngest) of the doubly linked list.
+     */
+    transient LinkedHashMap.Entry<K,V> tail;
+```
+
+
+
+收尾引用，内部存储结构仍然是数组 + 链表 + 红黑树结构
+
+
+
+
+
+实现LRU算法：
+
+```java
+void afterNodeAccess(Node<K,V> e) { // move node to last
+    LinkedHashMap.Entry<K,V> last;
+    if (accessOrder && (last = tail) != e) {
+        LinkedHashMap.Entry<K,V> p =
+            (LinkedHashMap.Entry<K,V>)e, b = p.before, a = p.after;
+        p.after = null;
+        if (b == null)
+            head = a;
+        else
+            b.after = a;
+        if (a != null)
+            a.before = b;
+        else
+            last = b;
+        if (last == null)
+            head = p;
+        else {
+            p.before = last;
+            last.after = p;
+        }
+        tail = p;
+        ++modCount;
+    }
+}
+```
+
+
+
+
+
 
 
 # Set
