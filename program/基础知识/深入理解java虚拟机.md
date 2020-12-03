@@ -72,7 +72,7 @@ Java虚拟机把描述类的数据从Class文件加载到内存，并对数据�
 
 ## 类加载阶段
 
-![image-20200115174854950]( http://klaus_project.gitee.io/pic/note/image-20200115174854950.png)
+
 
 类加载的7个阶段，整个生命周期将会经历加载（Loading）、验证（Verification）、准备（Preparation）、解析（Resolution）、初始化（Initialization）、使用（Using）和卸载（Unloading）七个阶段，其中验证、准备、解析三个部分统称为连接（Linking）。
 
