@@ -27,6 +27,14 @@ docker images
 
 
 
+### 查询镜像
+
+```shell
+docker search httpd
+```
+
+
+
 ### 拉镜像
 
 ```shell
@@ -35,9 +43,40 @@ docker pull ubuntu
 
 拉取之前可以先查看镜像
 
+### 删除镜像
+
+```shell
+docker rmi hello-world
+```
 
 
 
+### 创建镜像
+
+- 1、从已经创建的容器中更新镜像，并且提交这个镜像
+- 2、使用 Dockerfile 指令来创建一个新的镜像
+
+
+
+### 更新镜像
+
+
+
+### 构建镜像
+
+```shell
+docker build 
+```
+
+使用dockerfile 来构建
+
+
+
+### 设置镜像标签
+
+```shell
+docker tag 860c279d2fec runoob/centos:dev
+```
 
 
 
@@ -145,6 +184,16 @@ docker rm -f 1e560fca3906
 
 
 
+映射端口
+
+```shell
+-p 是容器内部端口绑定到指定的主机端口
+docker run -d -p 5000:5000 training/webapp python app.py
+-P 是容器内部端口随机映射到主机的高端口
+```
+
+
+
 
 
 按照配置文件，运行docker build 之后生成的
@@ -157,7 +206,11 @@ docker rm -f 1e560fca3906
 
 
 
-## Docker-compose 的使用
+## Docker-compose 
+
+作用：定义和运行多容器 Docker 应用程序的工具。通过 Compose，您可以使用 YML 文件来配置应用程序需要的所有服务。然后，使用一个命令，就可以从 YML 文件配置中创建并启动所有服务
+
+例子：
 
 
 
