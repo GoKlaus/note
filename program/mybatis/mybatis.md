@@ -55,6 +55,30 @@ jar包中的mapper.xml文件加载
 
 
 
+## SqlNode
+
+**SqlNode接口**，简单理解就是xml中的每个标签，比如上述sql的update,trim,if标签
+
+![img](https://images.cnblogs.com/cnblogs_com/fangjian0423/603237/o_dynamicsql2.png)
+
+
+
+
+
+
+
+## SqlSource
+
+**Sql源接口**，代表从xml文件或注解映射的sql内容，主要就是用于创建BoundSql，有实现类DynamicSqlSource(动态Sql源)，StaticSqlSource(静态Sql源)等
+
+![img](https://images.cnblogs.com/cnblogs_com/fangjian0423/603237/o_dynamicsql3.png)
+
+## BoundSql
+
+封装mybatis最终产生sql的类，包括sql语句，参数，参数源数据等参数：
+
+
+
 
 
 ## sql注入
