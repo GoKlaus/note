@@ -1,14 +1,12 @@
-# git
-
 [TOC]
 
-## 常用指令
+## 
 
-### cache
+## git cache
 
 
 
-### rebase
+## git rebase
 
 git merge 操作合并分支会让两个分支的每一次提交都按照提交时间（并不是push时间）排序，并且会将两个分支的最新一次commit点进行合并成一个新的commit，最终的分支树呈现非整条线性直线的形式
 
@@ -16,11 +14,11 @@ git rebase操作实际上是将当前执行rebase分支的所有基于原分支�
 
 
 
-### merge
+## git merge
 
 
 
-### remote
+## git remote
 
 更新远程仓分支变化
 
@@ -39,7 +37,29 @@ git remote update --purge
 
 
 
-### global
+```shell
+git remote add origin xxxx
+```
+
+
+
+修改仓库地址
+
+```
+git remote set-url origin URL
+```
+
+
+
+
+
+
+
+## git global
+
+
+
+## git reflog
 
 
 
@@ -115,23 +135,11 @@ git config --global core.safecrlf warn
 |                                              |                                                    |      |
 |                                              |                                                    |      |
 
-# git reflog
+
+
+## 
 
 
 
 
-
-## remote
-
-```shell
-git remote add origin xxxx
-```
-
-
-
-修改仓库地址
-
-```
-git remote set-url origin URL
-```
 
