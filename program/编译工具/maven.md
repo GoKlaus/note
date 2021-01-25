@@ -478,3 +478,24 @@ mvn dependency:get -DremoteRepositories=http://repo1.maven.org/maven2/ -DgroupId
 mvn install:install-file -DgroupId=com.hypersmart -DartifactId=ibe2 -Dversion=1.1.0-SNAPSHOT -Dpackaging=jar -Dfile=C:\Users\Einyun\Downloads\i18n-1.1.0-SNAPSHOT.jar 
 ```
 
+
+
+
+
+## del lastupdated
+
+win
+
+```
+cd %userprofile%\.m2\repository
+for /r %i in (*.lastUpdated) do del %i
+```
+
+
+
+linux
+
+```shell
+find /app/maven/localRepository -name "*.lastUpdated" -exec grep -q "Could not transfer" {} \; -print -exec rm {} \;
+```
+
