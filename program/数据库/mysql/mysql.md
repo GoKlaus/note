@@ -965,6 +965,28 @@ set @a := 0;
 insert into sys_role_access(`id`, role_id, access_id, create_user_id, modify_user_id)(select @a := @a + 1 as `id`, 1 as role_id, id as access_id, 1 as `create_user_id`, 1 as `modify_user_id` from sys_access);
 ```
 
+```sql
+insert into plan_management_daily_report_detail(
+			`id`, `divide_id`, 
+			construction_id, construction_name, `plan_delivery_date`,
+			`node_id`, `node_desc`, `node_type`,
+			`plan_finish_date`, `actual_finish_date`,
+			`synchro_month`, `corporation_id`, 
+			`created_by`, `creation_date` 
+		)
+		select UUID(), t1.divide_id,  
+			t1.id, t1.`name`, t1.plan_delivery_date, 
+			t2.node_id, t2.node_desc, #{nodeType},
+			t2.plan_finish_date, t2.actual_finish_date,
+			#{synchroMonth}, t1.corporation_id, 
+			#{createdBy}, CURRENT_TIMESTAMP(3)
+		from construction_zone t1 
+		left join node_plan_setting t2 on t1.id = t2.construction_id
+		where t1.is_dele = 0 and t1.corporation_id = #{corporationId}  
+		 and t1.plan_delivery_date is not null 
+		 and t2.is_dele = 0  
+```
+
 
 
 

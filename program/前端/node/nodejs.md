@@ -1,6 +1,6 @@
 运行在服务器上解析后返回到前端，或者也可以做服务器脚本语言
 
-## Node.js事件循环
+# Node.js事件循环
 
 Node.js 是单进程单线程应用程序，但是因为 V8 引擎提供的异步执行回调接口，通过这些接口可以处理大量的并发，所以性能非常高。
 
@@ -10,7 +10,7 @@ Node.js 基本上所有的事件机制都是用设计模式中==观察者模式=
 
 Node.js 单线程类似进入一个while(true)的事件循环，直到没有事件观察者退出，每个异步事件都生成一个事件观察者，如果有事件发生就调用该回调函数.
 
-### 事件驱动程序
+## 事件驱动程序
 
 Node.js 使用事件驱动模型，当web server接收到请求，就把它关闭然后进行处理，然后去服务下一个web请求。
 
@@ -23,6 +23,38 @@ Node.js 使用事件驱动模型，当web server接收到请求，就把它关�
 ![img](https://www.runoob.com/wp-content/uploads/2015/09/event_loop.jpg)
 
 
+
+
+
+
+
+
+
+# 镜像配置
+
+临时
+
+```
+npm --registry https://registry.npm.taobao.org install express
+```
+
+
+
+
+
+
+
+永久
+
+```
+# 设置
+npm config set registry https://registry.npm.taobao.org 
+
+# 查看
+npm config ls
+
+npm config get registry
+```
 
 
 
