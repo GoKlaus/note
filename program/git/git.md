@@ -116,3 +116,22 @@ git config --global core.safecrlf warn
 |                                              |                                                    |      |
 
 # git reflog
+
+
+
+
+
+## remote
+
+```shell
+git remote add origin xxxx
+```
+
+
+
+修改仓库地址
+
+```
+git remote set-url origin URL
+```
+
