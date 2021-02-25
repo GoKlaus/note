@@ -77,7 +77,7 @@ git remote set-url origin URL
 
 windows
 
-git config --global core.autocrlf false
+git config --global core.autocrlf true
 
 git config --global core.safecrlf true
 
